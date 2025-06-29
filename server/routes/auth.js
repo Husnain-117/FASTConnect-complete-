@@ -12,6 +12,9 @@ router.post('/verify-and-register', authController.verifyAndRegister);
 // Login
 router.post('/login', authController.login);
 
+// Logout
+router.post('/logout', authenticate, authController.logout);
+
 // Forgot Password
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);

@@ -47,8 +47,8 @@ const Register = () => {
       await sendOTP(email)
       setOTPSent(true)
       setSuccess("Verification code sent to your email!")
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(""), 3000)
+      // Clear success message after 2 seconds
+      setTimeout(() => setSuccess(""), 2000)
     } catch (err: any) {
       setError(err.response?.data?.message || "An error occurred")
     }

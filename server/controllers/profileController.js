@@ -1,4 +1,121 @@
 const User = require('../models/User');
+const connectionCache = require('../utils/connectioncache');
+
+// Update user status to online
+// Call this when user logs in or connects via socket
+exports.userConnected = async (req, res) => {
+  try {
+    const userId = req.user?.id; // Get user ID from authenticated request
+    
+    if (!userId) {
+      console.error('No user ID in request:', { user: req.user });
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      });
+    }
+    
+    console.log(`[${new Date().toISOString()}] User connecting:`, { userId });
+    
+    // Update user status in the database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          isOnline: true,
+          lastSeen: new Date()
+        }
+      },
+      { 
+        new: true,
+        upsert: false
+      }
+    );
+    
+    // Update active connections
+    connectionCache.updateConnection(userId);
+    
+    if (!updatedUser) {
+      console.error('User not found:', { userId });
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    console.log(`[${new Date().toISOString()}] User connected successfully:`, {
+      userId: updatedUser._id,
+      email: updatedUser.email,
+      isOnline: updatedUser.isOnline,
+      lastSeen: updatedUser.lastSeen,
+      currentTime: new Date()
+    });
+    
+    res.json({
+      success: true,
+      message: 'User status updated to online',
+      user: {
+        id: updatedUser._id,
+        email: updatedUser.email,
+        isOnline: updatedUser.isOnline,
+        lastSeen: updatedUser.lastSeen
+      }
+    });
+    
+  } catch (err) {
+    console.error('Error updating user online status:', {
+      error: err.message,
+      stack: err.stack,
+      userId: req.user?.id
+    });
+    
+    res.status(500).json({
+      success: false,
+      message: 'Error updating online status',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
+  }
+};
+
+// Update user status to offline
+// Call this when user logs out or disconnects
+exports.userDisconnected = async (req, res) => {
+  try {
+    const userId = req.user.id; // Get user ID from authenticated request
+    
+    // Update user status in the database
+    const updatedUser = await User.findByIdAndUpdate(userId, {
+      isOnline: false,
+      lastSeen: new Date()
+    }, { new: true });
+    
+    // Remove from active connections
+    connectionCache.removeConnection(userId);
+    
+    console.log("User disconnected:", {
+      userId,
+      isOnline: updatedUser.isOnline,
+      lastSeen: updatedUser.lastSeen
+    });
+    
+    res.json({
+      success: true,
+      message: 'User status updated to offline',
+      user: {
+        id: updatedUser._id,
+        isOnline: updatedUser.isOnline,
+        lastSeen: updatedUser.lastSeen
+      }
+    });
+  } catch (err) {
+    console.error('Error updating user offline status:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating offline status',
+      error: err.message
+    });
+  }
+};
 
 // Get user profile
 exports.getProfile = async (req, res) => {
@@ -18,6 +135,115 @@ exports.getProfile = async (req, res) => {
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+// Get all online users
+exports.getOnlineUsers = async (req, res) => {
+  try {
+    const currentUserId = req.user?._id?.toString(); // Get the ID of the currently authenticated user
+    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000); // 5 minutes ago in milliseconds
+    
+    console.log(`[${new Date().toISOString()}] Fetching online users for user: ${currentUserId || 'not authenticated'}`);
+    
+    // Get active user IDs from the connection cache
+    const activeUserIds = connectionCache.getConnectedUserIds();
+    
+    // If we have active connections, use them to find online users
+    if (activeUserIds.length > 0) {
+      console.log(`[${new Date().toISOString()}] Found ${activeUserIds.length} active connections`);
+      
+      // Filter out any stale connections (older than 5 minutes)
+      const validUserIds = activeUserIds.filter(userId => {
+        const lastSeen = connectionCache.getLastSeen(userId);
+        return lastSeen && lastSeen >= fiveMinutesAgo;
+      });
+      
+      console.log(`[${new Date().toISOString()}] Found ${validUserIds.length} valid active connections`);
+      
+      // Find users who are in the active connections and not the current user
+      const onlineUsers = await User.find({
+        _id: { $in: validUserIds, $ne: currentUserId },
+        isOnline: true
+      })
+      .select('_id name email avatar campus batch lastSeen isOnline')
+      .sort({ lastSeen: -1 }) // Most recently active first
+      .lean();
+      
+      console.log(`Found ${onlineUsers.length} online users in database`);
+      
+      // Format the response
+      const formattedUsers = onlineUsers.map(user => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        isOnline: true, // We know they're online because they're in active connections
+        lastSeen: user.lastSeen,
+        campus: user.campus,
+        batch: user.batch
+      }));
+      
+      return res.json({
+        success: true,
+        count: formattedUsers.length,
+        users: formattedUsers
+      });
+    }
+    
+    // If no active connections or no valid users found
+    return res.json({
+      success: true,
+      count: 0,
+      users: []
+    });
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] Error in getOnlineUsers:`, {
+      error: error.message,
+      stack: error.stack,
+      currentUserId: req.user?._id?.toString(),
+      timestamp: new Date().toISOString()
+    });
+    
+    // Fallback to database if there's an error with the cache
+    try {
+      const onlineUsers = await User.find({
+        _id: { $ne: req.user?._id },
+        isOnline: true
+      })
+      .select('_id name email avatar campus batch lastSeen isOnline')
+      .sort({ lastSeen: -1 }) // Most recently active first
+      .lean();
+      
+      const formattedUsers = onlineUsers.map(user => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        isOnline: true,
+        lastSeen: user.lastSeen,
+        campus: user.campus,
+        batch: user.batch
+      }));
+      
+      return res.json({
+        success: true,
+        count: formattedUsers.length,
+        users: formattedUsers
+      });
+    } catch (err) {
+      console.error('Error fetching online users:', {
+        error: err.message,
+        stack: err.stack,
+        userId: req.user?._id
+      });
+      
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to fetch online users',
+        error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+      });
+    }
   }
 };
 

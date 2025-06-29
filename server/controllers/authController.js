@@ -1,3 +1,6 @@
+const connectionCache = require('../utils/connectioncache');
+const { connections: activeConnections } = connectionCache;
+
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -12,7 +15,7 @@ const validatePassword = (password) => {
 };
 
 const validateNUEmail = (email) => {
-  return email.toLowerCase().endsWith('@nu.edu.pk');
+  return email.toLowerCase().endsWith('@gmail.com');
 };
 
 const generateToken = (user) => {
@@ -362,51 +365,73 @@ exports.verifyOTP = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Validate email domain
-    if (!validateNUEmail(email)) {
-      return res.status(400).json({ message: 'Email must be a valid NU email (@nu.edu.pk)' });
-    }
-
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    }
+    // Mark user as online and update last seen
+    user.isOnline = true;
+    user.lastSeen = new Date();
+    await user.save();
 
-    // Check if user has set a password
-    if (!user.password) {
-      return res.status(401).json({ 
-        message: 'Account not fully registered. Please complete registration with OTP verification.' 
-      });
-    }
+    // Update active connections
+    connectionCache.updateConnection(user._id.toString());
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    // Create JWT token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1d'
+    });
 
-    const token = generateToken(user);
-    res.status(200).json({
+    res.json({
+      success: true,
+      message: 'Login successful',
       token,
       user: {
-        _id: user._id,
+        id: user._id,
         email: user.email,
-        name: user.name,
-        campus: user.campus,
-        batch: user.batch
+        isOnline: true
       }
     });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Logout user
+exports.logout = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Update status in DB
+    await User.findByIdAndUpdate(userId, {
+      isOnline: false,
+      lastSeen: new Date()
+    });
+
+    // Remove from active connections
+    connectionCache.removeConnection(userId.toString());
+
+    res.json({ success: true, message: 'User logged out successfully' });
+
+  } catch (err) {
+    console.error('Logout error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Note: Cleanup of inactive users is now handled by the connection cache utility
 
 exports.searchUsers = async (req, res) => {
   try {

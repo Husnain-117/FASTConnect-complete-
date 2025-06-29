@@ -56,12 +56,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      console.log('Attempting login for:', email);
+      const response = await axios.post('http://localhost:5000/api/auth/login', { 
+        email, 
+        password 
+      });
+      
       const { token, user } = response.data;
+      console.log('Login successful, user ID:', user._id);
+      
+      // Store auth data
       localStorage.setItem('token', token);
       localStorage.setItem('userId', user._id);
       setToken(token);
       setUser(user);
+      
+      // Update connection status
+      try {
+        console.log('Updating connection status to online...');
+        const statusResponse = await axios.post(
+          'http://localhost:5000/api/profile/connect', 
+          {},
+          { 
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            } 
+          }
+        );
+        console.log('Connection status updated:', statusResponse.data);
+      } catch (error) {
+        console.error('Error updating connection status:', error);
+        // Don't fail login if this fails
+      }
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -132,11 +159,63 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    const currentToken = token || localStorage.getItem('token');
+    console.log('Starting logout process...');
+    console.log('Current token exists:', !!currentToken);
+    
+    try {
+      // First update connection status
+      if (currentToken) {
+        try {
+          console.log('Updating connection status to offline...');
+          await axios.post(
+            'http://localhost:5000/api/profile/disconnect', 
+            {},
+            {
+              headers: { 
+                'Authorization': `Bearer ${currentToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          console.log('Successfully updated connection status to offline');
+        } catch (error) {
+          console.error('Error updating connection status:', error);
+          // Continue with logout even if this fails
+        }
+      }
+      
+      // Then call backend logout
+      if (currentToken) {
+        try {
+          console.log('Calling backend logout endpoint...');
+          await axios.post(
+            'http://localhost:5000/api/auth/logout', 
+            {},
+            {
+              headers: { 
+                'Authorization': `Bearer ${currentToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+        } catch (error) {
+          console.error('Error during backend logout:', error);
+          // Continue with client-side cleanup even if backend logout fails
+        }
+      }
+    } catch (error) {
+      console.error('Unexpected error during logout:', error);
+    } finally {
+      // Always perform client-side cleanup
+      console.log('Performing client-side cleanup...');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      setToken(null);
+      setUser(null);
+      console.log('Logout process completed');
+    }
   };
 
   return (

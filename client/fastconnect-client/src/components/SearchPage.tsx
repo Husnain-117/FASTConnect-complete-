@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
-import { useNavigate } from "react-router-dom"
 import type { User } from "../types/User"
 import Navbar from "./Navbar"
 
@@ -72,8 +71,7 @@ const styles = `
 `
 
 const Search = () => {
-  const { token, logout } = useAuth()
-  const navigate = useNavigate()
+  const { token, user } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState("none")
   const [profiles, setProfiles] = useState<User[]>([])
@@ -85,12 +83,20 @@ const Search = () => {
   const [showFavoritesLoading, setShowFavoritesLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Add this right after the component declaration
   useEffect(() => {
     const styleSheet = document.createElement("style")
     styleSheet.innerText = styles
     document.head.appendChild(styleSheet)
-    return () => document.head.removeChild(styleSheet)
+    return () => {
+      document.head.removeChild(styleSheet)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.body.style.scrollBehavior = 'smooth'
+    return () => {
+      document.body.style.scrollBehavior = ''
+    }
   }, [])
 
   const getInitials = (name: string) =>
@@ -105,26 +111,60 @@ const Search = () => {
 
   const isFavorited = (id: string) => favorites.includes(id)
 
-  const [toastType, setToastType] = useState<"success" | "error" | null>(null)
-  const toast = (msg: string, type: "success" | "error" = "error") => {
+  const toast = (msg: string) => {
     setError(msg)
-    setToastType(type)
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setError(null)
-      setToastType(null)
     }, 3000)
+    return () => clearTimeout(timer)
   }
+
+  // Load online users
+  const fetchOnlineUsers = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/profile/online', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!res.ok) throw new Error('Failed to fetch online users');
+      
+      const data = await res.json();
+      // Extract just the IDs of online users
+      const onlineUserIds = data.map((user: any) => user._id);
+      return onlineUserIds;
+    } catch (err) {
+      console.error('Error fetching online users:', err);
+      toast('Failed to load online users');
+      return [];
+    }
+  };
 
   // Load profiles
   const fetchUsers = async () => {
-    setLoading(true)
+    setLoading(true);
+    setError(null);
+    
     try {
+      // Get current user ID from token
+      const currentUserId = user?._id;
+      
+      // If online filter is selected, fetch online users first
+      if (filterType === 'online') {
+        const onlineUserIds = await fetchOnlineUsers();
+        if (onlineUserIds.length === 0) {
+          setProfiles([]);
+          return;
+        }
+      }
+      
       const params = new URLSearchParams({
         page: "1",
         limit: "20",
         ...(filterType === "name" && searchQuery ? { name: searchQuery, searchType: "name" } : {}),
-        ...(filterType === "campus" && searchQuery ? { campus: searchQuery, searchType: "campus" } : {}),
-      })
+        ...(filterType === "campus" && searchQuery ? { campus: searchQuery, searchType: "campus" } : {})
+      });
 
       const res = await fetch(`http://localhost:5000/api/auth/search-users?${params.toString()}`, {
         headers: {
@@ -135,7 +175,9 @@ const Search = () => {
       if (!res.ok) throw new Error("Failed to fetch profiles")
 
       const data = await res.json()
-      setProfiles(data.users || [])
+      // Filter out the current user from the results
+      const filteredUsers = (data.users || []).filter((user: User) => user._id !== currentUserId);
+      setProfiles(filteredUsers)
     } catch (err) {
       console.error(err)
       toast("Could not load profiles")
@@ -147,7 +189,7 @@ const Search = () => {
   // Load favorites
   const fetchFavorites = async () => {
     if (!token) {
-      toast("Please login to view favorites")
+      setError("Please login to view favorites")
       return
     }
 
@@ -160,8 +202,11 @@ const Search = () => {
       if (!res.ok) throw new Error("Failed to fetch favorites")
 
       const data = await res.json()
-      setFavorites(data.favorites.map((u: User) => u._id))
-      setFavoriteProfiles(data.favorites)
+      // Filter out the current user from favorites
+      const currentUserId = user?._id;
+      const filteredFavorites = data.favorites.filter((favUser: User) => favUser._id !== currentUserId);
+      setFavorites(filteredFavorites.map((u: User) => u._id))
+      setFavoriteProfiles(filteredFavorites)
     } catch (err) {
       console.error(err)
       toast("Failed to fetch favorites")
@@ -172,9 +217,23 @@ const Search = () => {
 
   // Toggle favorites UI
   const toggleShowFavorites = () => {
-    if (!showFavorites) fetchFavorites()
-    setShowFavorites((prev) => !prev)
-  }
+    if (!showFavorites) fetchFavorites();
+    setShowFavorites(prev => !prev);
+    setFilterType('none');
+    setSearchQuery('');
+  };
+  
+  // Handle filter type change
+  const handleFilterTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newFilterType = e.target.value;
+    setFilterType(newFilterType);
+    setSearchQuery('');
+    
+    // If online filter is selected, we'll handle it in the fetchUsers function
+    if (newFilterType === 'online') {
+      fetchUsers();
+    }
+  };
 
   // Toggle favorite status
   const toggleFavorite = async (id: string) => {
@@ -203,11 +262,11 @@ const Search = () => {
         if (prof) setFavoriteProfiles((prev) => [...prev, prof])
         setFavorites((prev) => [...prev, id])
       
-        toast("Added to favorites", 'success')
+        toast("Added to favorites")
       }
     } catch (err) {
       console.error(err)
-      toast("Error updating favorite", 'error') 
+      toast("Error updating favorite")
     } finally {
       setFavoritesLoading(false)
     }
@@ -230,6 +289,45 @@ const Search = () => {
     const timeout = setTimeout(fetchUsers, 500)
     return () => clearTimeout(timeout)
   }, [searchQuery, filterType])
+
+  // Filter profiles based on search query and type
+  const filteredProfiles = (showFavorites ? favoriteProfiles : profiles).filter((profile) => {
+    // If online filter is active, only show online users
+    if (filterType === 'online' && !profile.isOnline) return false;
+    
+    if (searchQuery === "") return true;
+    
+    const query = searchQuery.toLowerCase();
+    const profileName = typeof profile.name === 'string' ? profile.name.toLowerCase() : '';
+    const profileCampus = typeof profile.campus === 'string' ? profile.campus.toLowerCase() : '';
+    const profileDept = typeof profile.department === 'object' && profile.department?.name 
+      ? profile.department.name.toLowerCase() 
+      : '';
+    const profileBatch = typeof profile.batch === 'object' && profile.batch?.year 
+      ? profile.batch.year.toString() 
+      : '';
+    
+    if (filterType === "name") {
+      return profileName.includes(query);
+    } else if (filterType === "campus") {
+      return profileCampus.includes(query);
+    } else {
+      // Search in all fields
+      return (
+        profileName.includes(query) ||
+        profileCampus.includes(query) ||
+        profileDept.includes(query) ||
+        profileBatch.includes(query)
+      );
+    }
+  });
+  
+  // Determine the display text based on the current filter
+  const getDisplayText = () => {
+    if (showFavorites) return `${favoriteProfiles.length} Favorites`;
+    if (filterType === 'online') return `${filteredProfiles.length} Online Students`;
+    return `${filteredProfiles.length} Students Found`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-teal-50">
@@ -271,7 +369,7 @@ const Search = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 animate-slideInUp animation-delay-100">
           <div className="mb-4 sm:mb-0">
             <h2 className="text-2xl font-bold text-gray-900">
-              {showFavorites ? `${favoriteProfiles.length} Favorites` : `${profiles.length} Students Found`}
+              {getDisplayText()}
             </h2>
             <p className="text-gray-600 mt-1">
               {showFavorites
@@ -368,7 +466,7 @@ const Search = () => {
 
         {/* Search Controls */}
         {!showFavorites && (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 mb-12 animate-slideInUp animation-delay-200">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 mb-12 animate-slideInUp">
             <div className="flex items-center mb-6">
               <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mr-4">
                 <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -376,7 +474,7 @@ const Search = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0 4a2 2 0 100 4m0-4a2 2 0 110-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4a2 2 0 110-4m0 4a2 2 0 100 4"
                   />
                 </svg>
               </div>
@@ -390,11 +488,13 @@ const Search = () => {
                 <select
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 hover:border-emerald-300"
                   value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
+                  onChange={handleFilterTypeChange}
                 >
-                  <option value="none">Show All Students</option>
-                  <option value="name">Search by Name</option>
-                  <option value="campus">Filter by Campus</option>
+                 <option value="none">Show All Students</option>
+                 <option value="name">Search by Name</option>
+                 <option value="campus">Filter by Campus</option>
+                 <option value="online">Show Online Students</option>
+
                 </select>
               </div>
 
@@ -418,15 +518,17 @@ const Search = () => {
                     className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-emerald-300"
                     type="text"
                     value={searchQuery}
-                    placeholder={
-                      filterType === "name"
-                        ? "Enter student name..."
-                        : filterType === "campus"
-                          ? "Enter campus name..."
-                          : "Select a filter type to search..."
-                    }
+                    placeholder={filterType === "name"
+                      ? "Enter student name..."
+                      : filterType === "campus"
+                        ? "Enter campus name..."
+                        : filterType === "online"
+                          ? "No input needed for online filter"
+                          : "Select a filter type to search..."}
+                    
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    disabled={filterType === "none"}
+                    disabled={filterType === "none" || filterType === "online"}
+
                   />
                   {searchQuery && (
                     <button onClick={clearSearch} className="absolute inset-y-0 right-0 pr-3 flex items-center group">
@@ -448,29 +550,22 @@ const Search = () => {
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 animate-pulse">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-16 h-16 bg-gray-300 rounded-full"></div>
-                  <div className="flex-1">
-                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded mb-1"></div>
-                    <div className="h-3 bg-gray-300 rounded w-3/4"></div>
-                  </div>
-                  <div className="w-8 h-8 bg-gray-300 rounded"></div>
-                </div>
-              </div>
-            ))}
+        {/* Loading and Content */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
           </div>
-        )}
-
-        {/* Profiles Grid */}
-        {!loading && (
+        ) : error ? (
+          <div className="text-center text-red-500">{error}</div>
+        ) : filteredProfiles.length === 0 ? (
+          <div className="text-center text-gray-500">
+            {filterType === 'online' 
+              ? 'No online students found' 
+              : 'No students found'}
+          </div>
+        ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {(showFavorites ? favoriteProfiles : profiles).map((profile, index) => (
+            {filteredProfiles.map((profile, index) => (
               <div
                 key={profile._id}
                 className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] animate-slideInUp h-40 flex flex-col justify-between"
@@ -487,7 +582,7 @@ const Search = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-semibold text-gray-900 truncate">{profile.name || "Unknown"}</h3>
-                      <p className="text-sm text-gray-600 truncate">Batch {profile.batch || "N/A"}</p>
+                      <p className="text-sm text-gray-600 truncate">Batch {profile.batch?.year || "N/A"}</p>
                       <p className="text-xs text-gray-500 flex items-center mt-1 truncate">
                         <svg
                           className="w-3 h-3 mr-1 flex-shrink-0"
