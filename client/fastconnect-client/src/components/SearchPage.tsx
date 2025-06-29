@@ -90,6 +90,7 @@ const Search = () => {
     return () => {
       document.head.removeChild(styleSheet)
     }
+    
   }, [])
 
   useEffect(() => {
@@ -130,10 +131,16 @@ const Search = () => {
       
       if (!res.ok) throw new Error('Failed to fetch online users');
       
-      const data = await res.json();
+      const response = await res.json();
+      
+      // Check if the response has the expected structure
+      if (!response.success || !Array.isArray(response.users)) {
+        console.error('Unexpected response format:', response);
+        return [];
+      }
+      
       // Extract just the IDs of online users
-      const onlineUserIds = data.map((user: any) => user._id);
-      return onlineUserIds;
+      return response.users.map((user: any) => user._id);
     } catch (err) {
       console.error('Error fetching online users:', err);
       toast('Failed to load online users');
@@ -149,6 +156,7 @@ const Search = () => {
     try {
       // Get current user ID from token
       const currentUserId = user?._id;
+      let query = searchQuery;
       
       // If online filter is selected, fetch online users first
       if (filterType === 'online') {
@@ -157,16 +165,38 @@ const Search = () => {
           setProfiles([]);
           return;
         }
+        // Use the online user IDs as the query
+        query = onlineUserIds.join(',');
       }
       
-      const params = new URLSearchParams({
+      let params = new URLSearchParams({
         page: "1",
-        limit: "20",
-        ...(filterType === "name" && searchQuery ? { name: searchQuery, searchType: "name" } : {}),
-        ...(filterType === "campus" && searchQuery ? { campus: searchQuery, searchType: "campus" } : {})
+        limit: "20"
       });
 
-      const res = await fetch(`http://localhost:5000/api/auth/search-users?${params.toString()}`, {
+      if (filterType === 'online') {
+        // For online users, we need to pass the IDs as a comma-separated list
+        const onlineUserIds = await fetchOnlineUsers();
+        if (onlineUserIds.length > 0) {
+          // Add all IDs as a single comma-separated parameter
+          params.append('_id', onlineUserIds.join(','));
+        }
+      } else if (filterType === 'name' && query) {
+        params.append('name', query);
+        params.append('searchType', 'name');
+      } else if (filterType === 'campus' && query) {
+        params.append('campus', query);
+        params.append('searchType', 'campus');
+      }
+
+      // Log the URL for debugging
+      const url = `http://localhost:5000/api/auth/search-users?${params.toString()}`;
+      console.log('Fetching URL:', url);
+      
+      console.log('Filter type:', filterType);
+      console.log('Query params:', Object.fromEntries(params.entries()));
+      
+      const res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -175,8 +205,33 @@ const Search = () => {
       if (!res.ok) throw new Error("Failed to fetch profiles")
 
       const data = await res.json()
+      console.log('API Response:', JSON.stringify(data, null, 2));
+      
+      // Process users and ensure isOnline is set correctly
+      const processedUsers = (data.users || []).map((user: any) => {
+        // Check both lastActive and lastSeen fields
+        const lastActiveTime = user.lastActive || user.lastSeen;
+        const lastActive = lastActiveTime ? new Date(lastActiveTime).getTime() : 0;
+        const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+        const isUserOnline = user.isOnline === true || lastActive > fiveMinutesAgo;
+        
+        console.log('Processing user:', user._id, 'isOnline:', isUserOnline, 'lastActive:', lastActiveTime);
+        
+        return {
+          ...user,
+          isOnline: isUserOnline,
+          lastActive: lastActiveTime || null,
+          lastSeen: user.lastSeen || null
+        } as User;
+      });
+      
       // Filter out the current user from the results
-      const filteredUsers = (data.users || []).filter((user: User) => user._id !== currentUserId);
+      const filteredUsers = processedUsers.filter((user: User) => {
+        console.log('Processing user:', user._id, 'isOnline:', user.isOnline, 'Current user ID:', currentUserId);
+        return user._id !== currentUserId;
+      });
+      
+      console.log('Filtered users:', filteredUsers);
       setProfiles(filteredUsers)
     } catch (err) {
       console.error(err)
@@ -292,9 +347,14 @@ const Search = () => {
 
   // Filter profiles based on search query and type
   const filteredProfiles = (showFavorites ? favoriteProfiles : profiles).filter((profile) => {
-    // If online filter is active, only show online users
-    if (filterType === 'online' && !profile.isOnline) return false;
+    // For online filter, we trust the backend to return only online users
+    if (filterType === 'online') {
+      // Just log that we're showing this user as they came from the online users endpoint
+      console.log('Showing online user:', profile._id, 'name:', profile.name);
+      return true;
+    }
     
+    // For other filter types, apply the search query if any
     if (searchQuery === "") return true;
     
     const query = searchQuery.toLowerCase();

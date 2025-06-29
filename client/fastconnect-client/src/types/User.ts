@@ -11,5 +11,6 @@ export interface User {
   }
   isVerified: boolean
   lastActive: string | null
+  lastSeen?: string | null  // Added optional lastSeen field
   isOnline: boolean
 }
