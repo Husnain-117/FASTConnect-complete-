@@ -3,6 +3,14 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticate } = require('../middleware/authenticate');
 
+console.log('Initializing auth routes...');
+
+// Test route
+router.get('/test', (req, res) => {
+  console.log('Test route hit');
+  res.json({ message: 'Auth routes are working!' });
+});
+
 // Send OTP
 router.post('/send-otp', authController.sendOTP);
 
@@ -33,7 +41,8 @@ router.delete('/:userId', authController.deleteUser);
 // Get all users (admin route)
 router.get('/users', authController.getAllUsers);
 
-// Add this route for getting current user
+// Get current user
 router.get('/me', authenticate, authController.getMe);
 
+console.log('Auth routes initialized');
 module.exports = router;

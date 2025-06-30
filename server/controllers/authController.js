@@ -441,14 +441,8 @@ exports.searchUsers = async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Get filter parameters
-    const { name, campus, searchType, _id } = req.query;
+    const { name, campus, searchType } = req.query;
     const filter = {};
-
-    // If _id parameter is provided, filter by those IDs
-    if (_id) {
-      const ids = _id.split(',');
-      filter._id = { $in: ids };
-    }
 
     // Add filters based on search type
     if (searchType === 'name') {

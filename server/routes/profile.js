@@ -27,13 +27,13 @@ router.post('/disconnect', authenticate, profileController.userDisconnected);
 // Get all online users
 router.get('/online', profileController.getOnlineUsers);
 
+// New route for photo upload
+router.post('/:userId/photo', upload.single('profilePhoto'), profileController.uploadProfilePhoto);
+
 // Existing routes...
 router.get('/:userId', profileController.getProfile);
 router.put('/:userId', profileController.updateProfile);
 router.delete('/:userId', profileController.deleteProfile);
 router.post('/:userId', profileController.createProfile);
-
-// New route for photo upload
-router.post('/:userId/photo', upload.single('profilePhoto'), profileController.uploadProfilePhoto);
 
 module.exports = router;
