@@ -9,6 +9,8 @@ import Navbar from "./Navbar"
 import { useSocket } from "../contexts/SocketContext"
 import { getOnlineUsers } from '../api/userApi'
 import type { User } from '../types/User'
+import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
 
 // Add this after the imports and before the component
 const styles = `
@@ -160,6 +162,7 @@ const TextChat: React.FC = () => {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [onlineUsersError, setOnlineUsersError] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Add this right after the component declaration
   useEffect(() => {
@@ -251,6 +254,14 @@ const TextChat: React.FC = () => {
     // Initial check
     handleScroll();
     return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Also update showScrollToBottom when messages change (e.g., after sending/receiving)
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10;
+    setShowScrollToBottom(!isAtBottom);
   }, [messages]);
 
   const handleScrollToBottom = () => {
@@ -550,14 +561,15 @@ const TextChat: React.FC = () => {
             )}
 
             <div ref={messagesEndRef} />
-            {/* Scroll to bottom arrow */}
+            {/* Improved Scroll to bottom arrow */}
             {showScrollToBottom && (
               <button
                 onClick={handleScrollToBottom}
-                className="fixed md:absolute bottom-24 right-8 md:right-6 z-20 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg p-3 transition-all duration-200 flex items-center justify-center animate-fadeIn"
+                className="absolute bottom-6 right-6 z-30 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-2xl p-4 transition-all duration-200 flex items-center justify-center border-4 border-white"
+                style={{ boxShadow: '0 4px 24px 0 rgba(16, 185, 129, 0.25)' }}
                 title="Scroll to latest message"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
@@ -567,7 +579,32 @@ const TextChat: React.FC = () => {
           {/* Message Input */}
           <div className="border-t border-gray-200 bg-white p-6">
             <form onSubmit={handleSendMessage} className="flex items-center space-x-4">
-              <div className="flex-1 relative">
+              <div className="flex-1 flex items-center relative">
+                {/* Emoji button on the left */}
+                <button
+                  type="button"
+                  onClick={() => setShowEmojiPicker((v) => !v)}
+                  className="mr-2 text-2xl p-2 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 border border-gray-200"
+                  aria-label="Add emoji"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M9 9h.01M15 9h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                {showEmojiPicker && (
+                  <div className="absolute bottom-12 left-0 z-50">
+                    <Picker
+                      data={data}
+                      onEmojiSelect={(emoji: any) => {
+                        setNewMessage(newMessage + emoji.native);
+                        setShowEmojiPicker(false);
+                      }}
+                      theme="light"
+                    />
+                  </div>
+                )}
                 <input
                   ref={inputRef}
                   type="text"
@@ -576,16 +613,6 @@ const TextChat: React.FC = () => {
                   placeholder="Type your message..."
                   className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 pr-12"
                 />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                    />
-                  </svg>
-                </div>
               </div>
 
               <button
