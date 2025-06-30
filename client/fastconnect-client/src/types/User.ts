@@ -13,4 +13,5 @@ export interface User {
   lastActive: string | null
   lastSeen?: string | null  // Added optional lastSeen field
   isOnline: boolean
+  avatar?: string
 }

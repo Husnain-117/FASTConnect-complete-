@@ -7,6 +7,8 @@ import axiosInstance from "../api/axiosConfig"
 import { useAuth } from "../context/AuthContext"
 import Navbar from "./Navbar"
 import { useSocket } from "../contexts/SocketContext"
+import { getOnlineUsers } from '../api/userApi'
+import type { User } from '../types/User'
 
 // Add this after the imports and before the component
 const styles = `
@@ -155,6 +157,8 @@ const TextChat: React.FC = () => {
   const [filter, setFilter] = useState<string>("all");
   const [customStart, setCustomStart] = useState<string>("");
   const [customEnd, setCustomEnd] = useState<string>("");
+  const [onlineUserList, setOnlineUserList] = useState<User[]>([])
+  const [loadingOnlineList, setLoadingOnlineList] = useState(true)
 
   // Add this right after the component declaration
   useEffect(() => {
@@ -233,10 +237,10 @@ const TextChat: React.FC = () => {
   useEffect(() => {
     const container = messagesEndRef.current?.parentElement;
     if (!container) return;
-    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-    if (isNearBottom) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    // Only scroll if NOT already at the bottom (allow a small threshold)
+    const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10;
+    if (!isAtBottom) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto" }); // Use 'auto' for instant, no shake
   }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -301,6 +305,21 @@ const TextChat: React.FC = () => {
     }
     return true;
   });
+
+  useEffect(() => {
+    const fetchOnlineList = async () => {
+      setLoadingOnlineList(true)
+      try {
+        const res = await getOnlineUsers()
+        setOnlineUserList(res.users || [])
+      } catch (err) {
+        setOnlineUserList([])
+      } finally {
+        setLoadingOnlineList(false)
+      }
+    }
+    fetchOnlineList()
+  }, [])
 
   if (loading) {
     return (
@@ -400,6 +419,30 @@ const TextChat: React.FC = () => {
 
         {/* Chat Container */}
         <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden animate-slideInUp animation-delay-100">
+          {/* Online User List */}
+          {loadingOnlineList ? (
+            <div className="flex items-center justify-center py-2 text-sm text-gray-500">Loading online users...</div>
+          ) : onlineUserList.length > 0 ? (
+            <div className="flex items-center space-x-2 px-6 pt-4 pb-2 overflow-x-auto">
+              {onlineUserList.slice(0, 8).map(user => (
+                <div key={user._id} className="flex flex-col items-center">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs mb-1">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-700 truncate max-w-[60px]">{user.name.split(' ')[0]}</span>
+                </div>
+              ))}
+              {onlineUserList.length > 8 && (
+                <span className="text-xs text-gray-500">+{onlineUserList.length - 8} more</span>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-2 text-sm text-gray-500">No users online</div>
+          )}
           {/* Chat Header */}
           <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4">
             <div className="flex items-center justify-between">
@@ -433,9 +476,7 @@ const TextChat: React.FC = () => {
                 return (
                   <div
                     key={message._id}
-                    className={`flex ${isOwnMessage ? "justify-end" : "justify-start"} ${
-                      isOwnMessage ? "animate-slideInRight" : "animate-slideInLeft"
-                    }`}
+                    className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`flex items-end space-x-2 max-w-xs md:max-w-md lg:max-w-lg ${isOwnMessage ? "flex-row-reverse space-x-reverse" : ""}`}
@@ -447,7 +488,7 @@ const TextChat: React.FC = () => {
 
                       {/* Message Bubble */}
                       <div
-                        className={`rounded-2xl px-4 py-3 shadow-lg transform transition-all duration-300 hover:scale-105 ${
+                        className={`rounded-2xl px-4 py-3 shadow-lg ${
                           isOwnMessage
                             ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-br-md"
                             : "bg-white border border-gray-200 text-gray-800 rounded-bl-md"
