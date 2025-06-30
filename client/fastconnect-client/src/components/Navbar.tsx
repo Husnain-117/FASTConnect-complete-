@@ -18,6 +18,10 @@ const Navbar = () => {
     }
   }
 
+  const goToTextChat = () => {
+    navigate("/text-chat")
+  }
+
   const goToProfile = () => {
     if (userId) {
       navigate(`/profile/${userId}`)

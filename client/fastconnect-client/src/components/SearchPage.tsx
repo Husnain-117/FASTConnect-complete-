@@ -152,6 +152,10 @@ const Search = () => {
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
+    let params = new URLSearchParams({
+      page: "1",
+      limit: "20"
+    });
     
     try {
       // Get current user ID from token
@@ -160,27 +164,21 @@ const Search = () => {
       
       // If online filter is selected, fetch online users first
       if (filterType === 'online') {
-        const onlineUserIds = await fetchOnlineUsers();
-        if (onlineUserIds.length === 0) {
+        const res = await fetch('http://localhost:5000/api/profile/online', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error('Failed to fetch online users');
+        const response = await res.json();
+        if (!response.success || !Array.isArray(response.users)) {
           setProfiles([]);
+          setLoading(false);
           return;
         }
-        // Use the online user IDs as the query
-        query = onlineUserIds.join(',');
-      }
-      
-      let params = new URLSearchParams({
-        page: "1",
-        limit: "20"
-      });
-
-      if (filterType === 'online') {
-        // For online users, we need to pass the IDs as a comma-separated list
-        const onlineUserIds = await fetchOnlineUsers();
-        if (onlineUserIds.length > 0) {
-          // Add all IDs as a single comma-separated parameter
-          params.append('_id', onlineUserIds.join(','));
-        }
+        setProfiles(response.users);
+        setLoading(false);
+        return;
       } else if (filterType === 'name' && query) {
         params.append('name', query);
         params.append('searchType', 'name');
@@ -388,6 +386,15 @@ const Search = () => {
     if (filterType === 'online') return `${filteredProfiles.length} Online Students`;
     return `${filteredProfiles.length} Students Found`;
   };
+
+  useEffect(() => {
+    if (filterType === 'online') {
+      const interval = setInterval(() => {
+        fetchUsers();
+      }, 10000); // 10 seconds
+      return () => clearInterval(interval);
+    }
+  }, [filterType]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-teal-50">

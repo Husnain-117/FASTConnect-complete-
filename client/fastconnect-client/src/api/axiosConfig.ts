@@ -1,16 +1,17 @@
 import axios from 'axios';
 
 // Create axios instance with default config
-const api = axios.create({
+const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/api',
-  withCredentials: true, // This is important for sending cookies with cross-origin requests
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-  },
+    'Accept': 'application/json'
+  }
 });
 
-// Add a request interceptor to include the auth token in every request
-api.interceptors.request.use(
+// Add a request interceptor to include the auth token
+axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -23,8 +24,8 @@ api.interceptors.request.use(
   }
 );
 
-// Add a response interceptor to handle errors globally
-api.interceptors.response.use(
+// Add a response interceptor to handle errors
+axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
@@ -36,4 +37,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default axiosInstance;
