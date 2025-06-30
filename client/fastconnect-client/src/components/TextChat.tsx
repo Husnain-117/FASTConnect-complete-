@@ -149,16 +149,17 @@ const TextChat: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [isTyping, setIsTyping] = useState(false)
-  const [onlineUsers, setOnlineUsers] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const { socket } = useSocket()
-  const { user } = useAuth()
+  const { user, token } = useAuth()
   const inputRef = useRef<HTMLInputElement>(null);
   const [filter, setFilter] = useState<string>("all");
   const [customStart, setCustomStart] = useState<string>("");
   const [customEnd, setCustomEnd] = useState<string>("");
-  const [onlineUserList, setOnlineUserList] = useState<User[]>([])
-  const [loadingOnlineList, setLoadingOnlineList] = useState(true)
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineUsersError, setOnlineUsersError] = useState<string | null>(null);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   // Add this right after the component declaration
   useEffect(() => {
@@ -218,30 +219,44 @@ const TextChat: React.FC = () => {
       setTimeout(() => setIsTyping(false), 3000);
     };
 
-    const handleOnlineUsers = (count: number) => {
-      setOnlineUsers(count);
-    };
-
     socket.on("new_message", handleNewMessage);
     socket.on("user_typing", handleUserTyping);
-    socket.on("online_users", handleOnlineUsers);
 
     return () => {
       socket.off("new_message", handleNewMessage);
       socket.off("user_typing", handleUserTyping);
-      socket.off("online_users", handleOnlineUsers);
     };
   }, [socket]);
 
   // Auto-scroll to bottom when messages change, but only if user is near the bottom
   useEffect(() => {
-    const container = messagesEndRef.current?.parentElement;
+    const container = messagesContainerRef.current;
     if (!container) return;
     // Only scroll if NOT already at the bottom (allow a small threshold)
     const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10;
-    if (!isAtBottom) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: "auto" }); // Use 'auto' for instant, no shake
+    if (isAtBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" }); // Use 'auto' for instant, no shake
+    }
   }, [messages]);
+
+  // Track if user is not at the bottom, show scroll-to-bottom button
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const handleScroll = () => {
+      const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10;
+      setShowScrollToBottom(!isAtBottom);
+    };
+    container.addEventListener('scroll', handleScroll);
+    // Initial check
+    handleScroll();
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [messages]);
+
+  const handleScrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // After scrolling, the scroll event will fire and hide the button if at bottom
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -306,20 +321,37 @@ const TextChat: React.FC = () => {
     return true;
   });
 
-  useEffect(() => {
-    const fetchOnlineList = async () => {
-      setLoadingOnlineList(true)
-      try {
-        const res = await getOnlineUsers()
-        setOnlineUserList(res.users || [])
-      } catch (err) {
-        setOnlineUserList([])
-      } finally {
-        setLoadingOnlineList(false)
-      }
+  // Copy-paste logic from SearchPage.tsx
+  const fetchOnlineUsers = async () => {
+    if (!token) {
+      setOnlineUsersError('No auth token');
+      return [];
     }
-    fetchOnlineList()
-  }, [])
+    try {
+      console.log('Token used for fetch:', token);
+      const res = await fetch('http://localhost:5000/api/profile/online', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error('Failed to fetch online users');
+      const response = await res.json();
+      if (!response.success || !Array.isArray(response.users)) {
+        console.error('Unexpected response format:', response);
+        return [];
+      }
+      return response.users.map((user: any) => user._id);
+    } catch (err) {
+      console.error('Error fetching online users:', err);
+      setOnlineUsersError('Failed to load online users');
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    fetchOnlineUsers().then(setOnlineUsers);
+  }, [token]);
 
   if (loading) {
     return (
@@ -391,70 +423,53 @@ const TextChat: React.FC = () => {
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={`px-4 py-2 rounded-lg font-semibold border transition-colors duration-200 ${filter === f.value ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'}`}
+              className={`px-4 py-2 rounded-lg font-semibold border transition-colors duration-200 ${filter === f.value ? 'bg-emerald-500 text-white border-emerald-600 shadow-md' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'} ${f.value === 'custom' ? 'relative z-10' : ''}`}
+              style={f.value === 'custom' ? { minWidth: 90, fontWeight: 700, letterSpacing: 0.5 } : {}}
             >
               {f.label}
             </button>
           ))}
           {filter === 'custom' && (
-            <>
+            <div className="flex items-center gap-2 bg-white border border-emerald-200 rounded-lg px-3 py-1 ml-1 shadow-sm">
               <input
                 type="date"
                 value={customStart}
                 onChange={e => setCustomStart(e.target.value)}
-                className="ml-2 px-2 py-1 border rounded"
+                className="px-2 py-1 border border-emerald-400 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                 max={customEnd || undefined}
+                style={{ colorScheme: 'light' }}
               />
-              <span className="mx-1">to</span>
+              <span className="mx-1 text-gray-500">to</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={e => setCustomEnd(e.target.value)}
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 border border-emerald-400 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                 min={customStart || undefined}
+                style={{ colorScheme: 'light' }}
               />
-            </>
+            </div>
           )}
         </div>
 
         {/* Chat Container */}
         <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden animate-slideInUp animation-delay-100">
-          {/* Online User List */}
-          {loadingOnlineList ? (
-            <div className="flex items-center justify-center py-2 text-sm text-gray-500">Loading online users...</div>
-          ) : onlineUserList.length > 0 ? (
-            <div className="flex items-center space-x-2 px-6 pt-4 pb-2 overflow-x-auto">
-              {onlineUserList.slice(0, 8).map(user => (
-                <div key={user._id} className="flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs mb-1">
-                    {user.avatar ? (
-                      <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                      user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-                    )}
-                  </div>
-                  <span className="text-xs text-gray-700 truncate max-w-[60px]">{user.name.split(' ')[0]}</span>
-                </div>
-              ))}
-              {onlineUserList.length > 8 && (
-                <span className="text-xs text-gray-500">+{onlineUserList.length - 8} more</span>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center py-2 text-sm text-gray-500">No users online</div>
-          )}
           {/* Chat Header */}
           <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="text-emerald-100 text-sm">{onlineUsers} users online</div>
+                {onlineUsers.length > 0 ? (
+                  <div className="text-emerald-100 text-sm">{onlineUsers.length} users online</div>
+                ) : (
+                  <div className="text-emerald-100 text-sm">No users online</div>
+                )}
               </div>
               <div className="text-white text-lg font-bold">University Global Chat</div>
             </div>
           </div>
 
           {/* Messages Container */}
-          <div className="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50">
+          <div ref={messagesContainerRef} className="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50 relative">
             {filteredMessages.length === 0 ? (
               <div className="text-center py-12 animate-fadeIn">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
@@ -535,6 +550,18 @@ const TextChat: React.FC = () => {
             )}
 
             <div ref={messagesEndRef} />
+            {/* Scroll to bottom arrow */}
+            {showScrollToBottom && (
+              <button
+                onClick={handleScrollToBottom}
+                className="fixed md:absolute bottom-24 right-8 md:right-6 z-20 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg p-3 transition-all duration-200 flex items-center justify-center animate-fadeIn"
+                title="Scroll to latest message"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Message Input */}
