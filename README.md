@@ -1,54 +1,106 @@
 # FastConnect - Student Networking Platform
 
-FastConnect is a comprehensive networking platform designed exclusively for students of FAST University. It provides a seamless way for students to connect, collaborate, and network with their peers.
+FastConnect is a comprehensive networking platform designed exclusively for students of FAST University. It provides a seamless way for students to connect, collaborate, and network with their peers through multiple communication channels.
 
 ## Features
 
-### User Authentication
-- Secure JWT-based authentication system
-- User registration and login
-- Protected routes for authenticated users
+### 🔐 User Authentication & Security
+- **Secure JWT-based authentication system** with token management
+- **User registration and login** with email verification
+- **Protected routes** for authenticated users
+- **Password recovery** functionality
+- **Remember me** option for persistent sessions
+- **Secure password hashing** using bcrypt
 
-### Profile Management
-- Create and edit student profiles
-- Add profile pictures with image cropping
-- Display academic information and interests
+### 👤 Profile Management
+- **Complete profile creation and editing** with academic information
+- **Profile photo upload** with image cropping functionality
+- **Campus and batch selection** for all FAST University campuses
+- **Personal information** including age, gender, and about me sections
+- **Profile photo management** with drag-and-drop and crop interface
+- **Real-time profile updates** with immediate reflection
 
-### Search & Connect
-- Advanced search functionality to find other students
-- Filter by name, department, and interests
-- Add students to favorites for quick access
+### 🔍 Advanced Search & Discovery
+- **Multi-filter search functionality** to find other students
+- **Search by name** with real-time suggestions
+- **Filter by campus** (Islamabad, Lahore, Karachi, Peshawar, Multan, Faisalabad, Chiniot-Faisalabad)
+- **Online users filter** to see who's currently active
+- **Favorites system** to save and manage preferred connections
+- **Real-time online status** indicators
+- **Pagination support** for large user lists
 
-### Real-time Communication
-- In-app messaging system
-- Real-time notifications
-- Online/offline status indicators
+### 💬 Real-time Communication Features
 
-### Responsive Design
-- Mobile-first approach
-- Cross-device compatibility
-- Intuitive user interface
+#### 📝 Text Chat
+- **Global university chat** for all students
+- **Real-time messaging** with Socket.IO
+- **Message filtering** by date (today, yesterday, week, month, custom range)
+- **Emoji support** with emoji picker
+- **Typing indicators** and read receipts
+- **Message timestamps** and sender information
+- **Auto-scroll** to latest messages
+- **Online user count** display
+
+#### 🎤 Voice Chat
+- **Random voice matching** with other students
+- **WebRTC peer-to-peer** audio communication
+- **Real-time voice streaming** with low latency
+- **Connection status indicators** (searching, matched, connected)
+- **Skip functionality** to find different matches
+- **Online user tracking** in voice chat rooms
+- **Audio quality optimization** for clear communication
+
+#### 📹 Video Chat
+- **HD video communication** with WebRTC
+- **Face-to-face conversations** for study groups and collaboration
+- **Random video matching** with other students
+- **Dual video streams** (local and remote)
+- **Connection management** with accept/skip options
+- **Real-time video quality** optimization
+- **Cross-platform compatibility** for all devices
+
+### 🎨 Modern UI/UX
+- **Responsive design** that works on all devices
+- **Mobile-first approach** with touch-friendly interfaces
+- **Beautiful gradient designs** with emerald and teal themes
+- **Smooth animations** and transitions
+- **Loading states** and error handling
+- **Accessibility features** for inclusive design
+- **Dark/light mode** considerations
+
+### 🔧 Technical Features
+- **Real-time notifications** for new messages and connections
+- **Online/offline status** tracking with last seen timestamps
+- **Connection caching** for performance optimization
+- **File upload handling** with Multer
+- **Image processing** with cropping capabilities
+- **Error handling** and user feedback
+- **Performance optimization** with lazy loading
 
 ## Tech Stack
 
 ### Frontend
-- **React** - JavaScript library for building user interfaces
+- **React 19** - Latest JavaScript library for building user interfaces
 - **TypeScript** - For type-safe JavaScript development
 - **Vite** - Next Generation Frontend Tooling
 - **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - For client-side routing
+- **React Router DOM** - For client-side routing
 - **Socket.IO Client** - For real-time communication
 - **Axios** - For making HTTP requests
+- **React Easy Crop** - For image cropping functionality
+- **Emoji Mart** - For emoji picker component
+- **Lucide React** - For modern icons
 
 ### Backend
 - **Node.js** - JavaScript runtime environment
-- **Express** - Web application framework
+- **Express.js** - Web application framework
 - **MongoDB** - NoSQL database
 - **Mongoose** - MongoDB object modeling
 - **JSON Web Tokens (JWT)** - For authentication
 - **Socket.IO** - For real-time bidirectional communication
 - **Multer** - For handling file uploads
 - **Bcrypt** - For password hashing
+- **WebRTC** - For peer-to-peer communication
 
 ## Prerequisites
 
@@ -119,11 +171,22 @@ FastConnect/
 │   └── fastconnect-client/    # Vite + React + TypeScript
 │       ├── public/            # Static files
 │       ├── src/               # Source files
+│       │   ├── api/           # API configuration and calls
 │       │   ├── assets/        # Images, icons, etc.
 │       │   ├── components/    # Reusable UI components
+│       │   │   ├── Login.tsx          # Authentication component
+│       │   │   ├── Register.tsx       # User registration
+│       │   │   ├── Profile.tsx        # Profile management
+│       │   │   ├── SearchPage.tsx     # User search and discovery
+│       │   │   ├── TextChat.tsx       # Global text chat
+│       │   │   ├── VoiceChat.tsx      # Voice communication
+│       │   │   ├── VideoChat.tsx      # Video communication
+│       │   │   ├── Home.tsx           # Dashboard
+│       │   │   └── Navbar.tsx         # Navigation component
 │       │   ├── context/       # React context providers
-│       │   ├── pages/         # Page components
+│       │   ├── contexts/      # Socket context
 │       │   ├── types/         # TypeScript type definitions
+│       │   ├── utils/         # Utility functions
 │       │   ├── App.tsx        # Main application component
 │       │   └── main.tsx       # Application entry point
 │       ├── package.json       # Frontend dependencies
@@ -132,12 +195,20 @@ FastConnect/
 ├── server/                    # Backend Node.js application
 │   ├── config/               # Configuration files
 │   ├── controllers/          # Route controllers
+│   │   ├── authController.js      # Authentication logic
+│   │   ├── profileController.js   # Profile management
+│   │   ├── textController.js      # Text chat functionality
+│   │   ├── videoChatController.js # Video chat handling
+│   │   └── voiceSignalingController.js # Voice chat signaling
 │   ├── middleware/           # Custom middleware
 │   ├── models/               # Database models
+│   │   ├── User.js          # User model
+│   │   └── Message.js       # Message model
 │   ├── routes/               # API routes
 │   ├── utils/                # Utility functions
-│   ├── app.js               # Express application
-│   ├── server.js             # Server entry point
+│   ├── uploads/              # File upload directory
+│   ├── socket.js             # Socket.IO configuration
+│   ├── index.js              # Server entry point
 │   └── package.json          # Backend dependencies
 │
 ├── .gitignore                # Git ignore file
@@ -163,17 +234,52 @@ FastConnect/
 - `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/me` - Get current user profile
+- `POST /api/auth/forgot-password` - Request password reset
 
-### Users
+### Users & Profiles
+- `GET /api/auth/search-users` - Search users with filters
 - `GET /api/users` - Get all users
 - `GET /api/users/:id` - Get user by ID
 - `PUT /api/users/:id` - Update user
 - `DELETE /api/users/:id` - Delete user
 
+### Profile Management
+- `GET /api/profile/:userId` - Get user profile
+- `POST /api/profile/:userId` - Create user profile
+- `PUT /api/profile/:userId` - Update user profile
+- `DELETE /api/profile/:userId` - Delete user profile
+- `POST /api/profile/:userId/photo` - Upload profile photo
+- `GET /api/profile/online` - Get online users
+
 ### Favorites
-- `GET /api/favorites` - Get user's favorites
-- `POST /api/favorites/add/:id` - Add user to favorites
-- `DELETE /api/favorites/remove/:id` - Remove user from favorites
+- `GET /api/auth/favorites` - Get user's favorites
+- `POST /api/auth/favorites/add/:id` - Add user to favorites
+- `DELETE /api/auth/favorites/remove/:id` - Remove user from favorites
+
+### Messaging
+- `GET /api/messages/all` - Get all messages
+- `POST /api/messages/send` - Send a new message
+
+### Real-time Communication
+- Socket.IO events for real-time chat, voice, and video communication
+- WebRTC signaling for peer-to-peer connections
+
+## Real-time Features
+
+### Socket.IO Events
+- `new_message` - Real-time text messaging
+- `join-voice-chat` / `leave-voice-chat` - Voice chat room management
+- `join-video-chat` / `leave-video-chat` - Video chat room management
+- `start-search` / `start-video-search` - Random matching
+- `match-found` / `video-match-found` - Match notifications
+- `offer` / `answer` / `ice-candidate` - WebRTC signaling
+
+### WebRTC Features
+- **Peer-to-peer communication** for voice and video
+- **STUN servers** for NAT traversal
+- **ICE candidate exchange** for connection establishment
+- **Media stream handling** for audio/video transmission
+- **Connection state management** with automatic cleanup
 
 ## Contributing
 
