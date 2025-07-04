@@ -4,6 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import { Link, useNavigate } from "react-router-dom"
+import Profile from "./Profile"
 
 const Login = () => {
   const [email, setEmail] = useState("")
@@ -14,7 +15,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [campus, setCampus] = useState("")
 
-  const { login, userId } = useAuth()
+  const { login, userId, user } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,15 +26,11 @@ const Login = () => {
 
     try {
       await login(email, password)
-      setSuccess("Login successful! Redirecting to profile...")
+      setSuccess("Login successful! Redirecting to Home...")
 
       // Navigate to dashboard after 1.5 seconds
       setTimeout(() => {
-        if (userId) {
-          navigate(`/profile/${userId}`)
-        } else {
-          navigate("/home")
-        }
+        navigate('/home')
       }, 1000) // Changed from 1500 to 3000 (3 seconds)
     } catch (err: any) {
       setError(err.response?.data?.message || "An error occurred")

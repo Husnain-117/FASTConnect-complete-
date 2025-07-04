@@ -67,3 +67,35 @@ export default tseslint.config([
   },
 ])
 ```
+
+## Environment Variables
+
+Create a `.env` file in this directory with the following content:
+
+```
+VITE_API_URL=https://localhost:5000/api
+```
+
+- Change the URL to match your backend server if needed (e.g., LAN IP for mobile testing).
+- The frontend will use this variable for all API requests.
+
+## API Base URL Configuration
+
+The frontend connects to the backend using the `VITE_API_URL` environment variable. To set the backend address:
+
+1. Create a `.env` file in `client/fastconnect-client/` (you can copy from `.env.example`):
+
+   ```sh
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and set:
+
+   ```sh
+   VITE_API_URL=https://<your-backend-ip>:5000/api
+   ```
+   Replace `<your-backend-ip>` with the LAN IP shown in your backend logs (e.g., `192.168.1.15`).
+
+3. Restart the frontend dev server after changing `.env`.
+
+**Tip:** The backend LAN IP may change if your network changes. Always check your backend logs for the current IP and update `.env` as needed.

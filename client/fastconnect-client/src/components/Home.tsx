@@ -25,10 +25,10 @@ const Home = () => {
   }
 
   const goToProfile = () => {
-    if (userId) {
-      navigate(`/profile/${userId}`);
+    if (userId && userId !== 'undefined') {
+      navigate('/profile')
     } else {
-      navigate('/login');
+      navigate('/login')
     }
   }
 

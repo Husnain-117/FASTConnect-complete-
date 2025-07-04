@@ -3,15 +3,12 @@ import { useAuth } from "../context/AuthContext"
 import { useNavigate, Link } from "react-router-dom"
 
 const Navbar = () => {
-  const { user, logout, userId } = useAuth()
+  const { user, logout, userId, loading } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    console.log('Logout button clicked, starting logout process...');
     try {
-      console.log('Calling logout function from AuthContext...');
       await logout();
-      console.log('Logout successful, navigating to login page...');
       navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
@@ -23,15 +20,27 @@ const Navbar = () => {
   }
 
   const goToProfile = () => {
-    if (userId) {
-      navigate(`/profile/${userId}`)
+    if (userId && userId !== 'undefined') {
+      navigate(`/profile/${userId}`);
     } else {
-      navigate("/login")
+      navigate('/login');
     }
   }
 
   const goToSearch = () => {
     navigate("/search")
+  }
+
+  if (loading) {
+    return (
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="text-gray-500">Loading...</div>
+          </div>
+        </div>
+      </header>
+    );
   }
 
   return (
@@ -55,50 +64,43 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center space-x-1">
-            <a
-              href={userId ? `/profile/${userId}` : "/login"}
-              className="group relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-all duration-300 ease-in-out"
-            >
-              <span className="relative z-10">Profile</span>
-              <div className="absolute inset-0 bg-emerald-50 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
-            </a>
-            <a
-              href="/video-call"
+            
+            <Link
+              to="/videochat"
               className="group relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-all duration-300 ease-in-out"
             >
               <span className="relative z-10">Video Chat</span>
               <div className="absolute inset-0 bg-emerald-50 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
-            </a>
-            <a
-              href="/voice-call"
+            </Link>
+            <Link
+              to="/voice-chat"
               className="group relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-all duration-300 ease-in-out"
             >
               <span className="relative z-10">Voice Chat</span>
               <div className="absolute inset-0 bg-emerald-50 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
-            </a>
-            <a
-              href="/text-chat"
+            </Link>
+            <Link
+              to="/text-chat"
               className="group relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-all duration-300 ease-in-out"
             >
               <span className="relative z-10">Text Chat</span>
               <div className="absolute inset-0 bg-emerald-50 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
-            </a>
+            </Link>
             
-            <a
-              href="/search"
+            <Link
+              to="/search"
               className="group relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-all duration-300 ease-in-out"
             >
               <span className="relative z-10">Search</span>
               <div className="absolute inset-0 bg-emerald-50 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
-            </a>
-            <a
-              href="/about"
+            </Link>
+            <Link
+              to="/about"
               className="group relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-all duration-300 ease-in-out"
             >
               <span className="relative z-10">About</span>
               <div className="absolute inset-0 bg-emerald-50 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
-            </a>
-           
+            </Link>
           </nav>
 
           {/* User Actions */}
@@ -146,4 +148,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
+export default Navbar;

@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const path = require('path');
 const fs = require('fs');
 const { Server } = require('socket.io');
@@ -41,6 +42,45 @@ console.log('- MONGODB_URI:', process.env.MONGODB_URI ? '***' : 'Not set');
 // Initialize Express app
 const app = express();
 
+// Attach io to req for all requests (before routes)
+app.use((req, res, next) => {
+  req.io = req.app.get('io');
+  next();
+});
+
+// Define allowedOrigins at the top-level scope for reuse
+const allowedOrigins = [
+  /^https?:\/\/localhost(:\d+)?$/,  // All localhost ports
+  /^https?:\/\/192\.168\.1\.(\d+)(:\d+)?$/  // All 192.168.1.x addresses
+  // Add production domains here
+];
+
+// Define unified CORS configuration
+const corsOptions = {
+  origin: function(origin, callback) {
+    // Allow all origins in development
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    // In production, restrict origins (customize as needed)
+    if (!origin) return callback(null, true);
+    const isAllowed = allowedOrigins.some(pattern => pattern.test(origin));
+    if (isAllowed) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'), false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  exposedHeaders: ['Content-Length', 'X-Request-ID'],
+  maxAge: 86400,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+// Apply CORS middleware ONCE before any routes or custom logic
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 // Add request logging middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
@@ -52,48 +92,6 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Create HTTP server
-const server = http.createServer(app);
-
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'http://localhost:5174'
-];
-
-// Apply unified CORS middleware for Express
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-}));
-
-// Initialize Socket.IO with the same CORS configuration
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-  },
-  path: '/socket.io/',
-  serveClient: false,
-  pingTimeout: 60000,
-  pingInterval: 25000,
-  connectTimeout: 45000,
-  transports: ['websocket', 'polling'],
-  allowEIO3: true
-});
-
-// Add connection event logging
-io.engine.on("connection_error", (err) => {
-  console.log("Connection error:", err.req);      // the request object
-  console.log("Error message:", err.code);     // the error code, for example 1
-  console.log("Error message:", err.message);  // the error message, for example "Session ID unknown"
-  console.log("Error context:", err.context);  // some additional error context
-});
-
 // Set up connection cache on the app instance
 app.set('connectionCache', connectionCache);
 
@@ -102,12 +100,6 @@ connectDB();
 
 // Middleware
 app.use(express.json());
-
-// Add io to request object
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
 
 // Routes with error handling
 const loadRoute = (path, router) => {
@@ -133,8 +125,5 @@ app.get("/", (req, res) => {
   res.send("FASTConnect backend running...");
 });
 
-// Setup Socket.IO
-setupSocket(io);
-
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Export the Express app for use in https-server.js
+module.exports = app;

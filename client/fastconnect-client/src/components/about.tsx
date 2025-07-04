@@ -17,10 +17,10 @@ const About = () => {
   }
 
   const goToProfile = () => {
-    if (userId) {
-      navigate(`/profile/${userId}`);
+    if (userId && userId !== 'undefined') {
+      navigate('/profile')
     } else {
-      navigate('/login');
+      navigate('/login')
     }
   }
 
@@ -362,7 +362,7 @@ const About = () => {
               <h4 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h4>
               <ul className="space-y-2 text-gray-600">
                 <li>
-                  <a href={userId ? `/profile/${userId}` : '/login'} className="hover:text-emerald-600 transition-colors">
+                  <a href={userId && userId !== 'undefined' ? '/profile' : '/login'} className="hover:text-emerald-600 transition-colors">
                     Profile
                   </a>
                 </li>

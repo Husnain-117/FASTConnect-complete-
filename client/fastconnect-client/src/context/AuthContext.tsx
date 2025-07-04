@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 
 interface ApiResponse {
@@ -37,18 +37,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (storedToken) {
       setToken(storedToken);
       // Fetch user data
-      axios.get('http://localhost:5000/api/auth/me', {
-        headers: { Authorization: `Bearer ${storedToken}` }
-      })
-      .then(response => {
-        setUser(response.data.user);
-      })
-      .catch(error => {
-        console.error('Error fetching user data:', error);
-        localStorage.removeItem('token');
-        setToken(null);
-      })
-      .finally(() => setLoading(false));
+      axiosInstance.get('/auth/me')
+        .then(response => {
+          setUser(response.data.user);
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+          localStorage.removeItem('token');
+          setToken(null);
+        })
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
@@ -57,33 +55,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       console.log('Attempting login for:', email);
-      const response = await axios.post('http://localhost:5000/api/auth/login', { 
-        email, 
-        password 
-      });
-      
+      const response = await axiosInstance.post('/auth/login', { email, password });
       const { token, user } = response.data;
       console.log('Login successful, user ID:', user._id);
-      
       // Store auth data
       localStorage.setItem('token', token);
-      localStorage.setItem('userId', user._id);
+      if (user && (user._id || user.id)) {
+        localStorage.setItem('userId', String(user._id || user.id));
+      }
       setToken(token);
       setUser(user);
-      
       // Update connection status
       try {
         console.log('Updating connection status to online...');
-        const statusResponse = await axios.post(
-          'http://localhost:5000/api/profile/connect', 
-          {},
-          { 
-            headers: { 
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            } 
-          }
-        );
+        const statusResponse = await axiosInstance.post('/profile/connect', {});
         console.log('Connection status updated:', statusResponse.data);
       } catch (error) {
         console.error('Error updating connection status:', error);
@@ -97,7 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const register = async (email: string, password: string, name: string, campus: string, batch: string) => {
     try {
-      await axios.post('http://localhost:5000/api/auth/send-otp', { email });
+      await axiosInstance.post('/auth/send-otp', { email });
       // After OTP is sent, user will need to verify and complete registration
     } catch (error) {
       console.error('Registration error:', error);
@@ -107,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const sendOTP = async (email: string): Promise<ApiResponse> => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/send-otp', { email });
+      const response = await axiosInstance.post('/auth/send-otp', { email });
       return response.data;
     } catch (error) {
       console.error('Error sending OTP:', error);
@@ -117,7 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const verifyAndRegister = async (email: string, otp: string, password: string, name: string, campus: string, batch: string) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/verify-and-register', {
+      const response = await axiosInstance.post('/auth/verify-and-register', {
         email,
         otp,
         password,
@@ -137,9 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const forgotPassword = async (email: string) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/forgot-password', {
-        email
-      });
+      const response = await axiosInstance.post('/auth/forgot-password', { email });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'An error occurred while sending OTP');
@@ -148,7 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const resetPassword = async (email: string, otp: string, newPassword: string) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/reset-password', {
+      const response = await axiosInstance.post('/auth/reset-password', {
         email,
         otp,
         newPassword
@@ -163,58 +146,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const currentToken = token || localStorage.getItem('token');
     console.log('Starting logout process...');
     console.log('Current token exists:', !!currentToken);
-    
     try {
       // First update connection status
       if (currentToken) {
         try {
           console.log('Updating connection status to offline...');
-          await axios.post(
-            'http://localhost:5000/api/profile/disconnect', 
-            {},
-            {
-              headers: { 
-                'Authorization': `Bearer ${currentToken}`,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
+          await axiosInstance.post('/profile/disconnect', {});
           console.log('Successfully updated connection status to offline');
         } catch (error) {
           console.error('Error updating connection status:', error);
           // Continue with logout even if this fails
         }
       }
-      
       // Then call backend logout
       if (currentToken) {
         try {
           console.log('Calling backend logout endpoint...');
-          await axios.post(
-            'http://localhost:5000/api/auth/logout', 
-            {},
-            {
-              headers: { 
-                'Authorization': `Bearer ${currentToken}`,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
+          await axiosInstance.post('/auth/logout', {});
         } catch (error) {
-          console.error('Error during backend logout:', error);
-          // Continue with client-side cleanup even if backend logout fails
+          console.error('Error calling backend logout endpoint:', error);
         }
       }
-    } catch (error) {
-      console.error('Unexpected error during logout:', error);
-    } finally {
-      // Always perform client-side cleanup
-      console.log('Performing client-side cleanup...');
+      // Clear local storage and state
       localStorage.removeItem('token');
       localStorage.removeItem('userId');
       setToken(null);
       setUser(null);
-      console.log('Logout process completed');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
@@ -230,7 +190,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       forgotPassword,
       resetPassword,
       logout,
-      userId: user?._id || localStorage.getItem('userId') || null
+      userId: user?._id
+        ? String(user._id)
+        : user?.id
+          ? String(user.id)
+          : (localStorage.getItem('userId') && localStorage.getItem('userId') !== 'undefined'
+              ? localStorage.getItem('userId')
+              : null)
     }}>
       {children}
     </AuthContext.Provider>

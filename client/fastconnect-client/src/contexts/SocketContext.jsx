@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import API_BASE_URL from '../config/apiBaseUrl';
 
 const SocketContext = createContext();
 
@@ -14,14 +15,25 @@ export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) return;
 
-    // Initialize socket connection
-    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
-      query: { userId: user._id },
+    // Get userId from user object or localStorage
+    const userId = user?._id || user?.id || localStorage.getItem('userId');
+    if (!userId) {
+      return;
+    }
+
+    // Initialize socket connection with HTTPS
+    const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL.replace('/api', '')
+      : 'https://192.168.1.15:5000';
+      
+    const newSocket = io(SOCKET_SERVER_URL, {
+      query: { userId },
       withCredentials: true,
+      secure: true,
+      transports: ['websocket'],
     });
-
+    
     setSocket(newSocket);
 
     // Set up event listeners

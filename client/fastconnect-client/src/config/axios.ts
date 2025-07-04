@@ -1,8 +1,9 @@
 import axios from 'axios';
+import API_BASE_URL from '../config/apiBaseUrl';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://:5000/api',
   withCredentials: true, // This is important for sending cookies with cross-origin requests
   headers: {
     'Content-Type': 'application/json',

@@ -11,6 +11,7 @@ import { getOnlineUsers } from '../api/userApi'
 import type { User } from '../types/User'
 import Picker from '@emoji-mart/react'
 import data from '@emoji-mart/data'
+import API_BASE_URL from '../config/apiBaseUrl'
 
 // Add this after the imports and before the component
 const styles = `
@@ -200,34 +201,27 @@ const TextChat: React.FC = () => {
     if (!socket) return;
 
     const handleNewMessage = (message: Message) => {
-      setMessages(prevMessages => {
-        const exists = prevMessages.some(msg =>
-          msg._id === message._id ||
-          (msg._id.startsWith('temp-') && msg.text === message.text && msg.sender._id === message.sender._id)
-        );
-        if (exists) {
-          return prevMessages.map(msg =>
-            (msg._id.startsWith('temp-') && msg.text === message.text && msg.sender._id === message.sender._id)
-              ? message
-              : msg
-          );
-        } else {
-          return [...prevMessages, message];
-        }
-      });
+      console.log('[Socket] Received new_message:', message);
+      setMessages((prev) => [...prev, message]);
     };
 
-    const handleUserTyping = () => {
-      setIsTyping(true);
-      setTimeout(() => setIsTyping(false), 3000);
-    };
+    socket.on('new_message', handleNewMessage);
 
-    socket.on("new_message", handleNewMessage);
-    socket.on("user_typing", handleUserTyping);
+    // Optionally handle reconnection
+    socket.on('connect', () => {
+      // Optionally re-fetch messages or notify user
+      // fetchMessages();
+      
+    });
+
+    socket.on('disconnect', () => {
+      // Optionally notify user of disconnect
+    });
 
     return () => {
-      socket.off("new_message", handleNewMessage);
-      socket.off("user_typing", handleUserTyping);
+      socket.off('new_message', handleNewMessage);
+      socket.off('connect');
+      socket.off('disconnect');
     };
   }, [socket]);
 
@@ -340,7 +334,7 @@ const TextChat: React.FC = () => {
     }
     try {
       console.log('Token used for fetch:', token);
-      const res = await fetch('http://localhost:5000/api/profile/online', {
+      const res = await fetch(`${API_BASE_URL}/profile/online`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

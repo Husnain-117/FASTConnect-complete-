@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import type { User } from "../types/User"
 import Navbar from "./Navbar"
+import API_BASE_URL from '../config/apiBaseUrl'
 
 // Add this after the imports and before the component
 const styles = `
@@ -123,7 +124,7 @@ const Search = () => {
   // Load online users
   const fetchOnlineUsers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/profile/online', {
+      const res = await fetch(`${API_BASE_URL}/profile/online`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -164,7 +165,7 @@ const Search = () => {
       
       // If online filter is selected, fetch online users first
       if (filterType === 'online') {
-        const res = await fetch('http://localhost:5000/api/profile/online', {
+        const res = await fetch(`${API_BASE_URL}/profile/online`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -188,7 +189,7 @@ const Search = () => {
       }
 
       // Log the URL for debugging
-      const url = `http://localhost:5000/api/auth/search-users?${params.toString()}`;
+      const url = `${API_BASE_URL}/auth/search-users?${params.toString()}`;
       console.log('Fetching URL:', url);
       
       console.log('Filter type:', filterType);
@@ -248,7 +249,7 @@ const Search = () => {
 
     setShowFavoritesLoading(true)
     try {
-      const res = await fetch("http://localhost:5000/api/auth/favorites", {
+      const res = await fetch(`${API_BASE_URL}/auth/favorites`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -295,7 +296,7 @@ const Search = () => {
     setFavoritesLoading(true)
     try {
       const method = isFavorited(id) ? "DELETE" : "POST"
-      const url = `http://localhost:5000/api/auth/favorites/${isFavorited(id) ? "remove" : "add"}/${id}`
+      const url = `${API_BASE_URL}/auth/favorites/${isFavorited(id) ? "remove" : "add"}/${id}`
 
       const res = await fetch(url, {
         method,

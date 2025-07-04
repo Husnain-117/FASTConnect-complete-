@@ -8,6 +8,7 @@ import Cropper from "react-easy-crop"
 // @ts-ignore
 import getCroppedImg from "../utils/cropImage"
 import Navbar from "./Navbar"
+import API_BASE_URL from '../config/apiBaseUrl'
 
 // Add this after the imports and before the component
 const styles = `
@@ -54,12 +55,17 @@ const styles = `
   }
 `
 
-const Profile: React.FC = () => {
+interface ProfileProps {
+  user: { _id: string; name: string; email: string; /* ...other fields */ }
+}
+
+const Profile: React.FC<ProfileProps> = ({ user }) => {
   const { userId } = useParams<{ userId: string }>()
-  const { user, logout, userId: authUserId } = useAuth()
+  const { logout, userId: authUserId } = useAuth()
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
+    name: '',
     campus: "",
     batch: "",
     gender: "",
@@ -96,7 +102,7 @@ const Profile: React.FC = () => {
     if (!userId) return
 
     try {
-      const res = await fetch(`http://localhost:5000/api/profile/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}/profile/${userId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -119,6 +125,7 @@ const Profile: React.FC = () => {
         }
 
         setForm({
+          name: data.name || '',
           campus: data.campus || "",
           batch: data.batch || "",
           gender: data.gender || "",
@@ -174,7 +181,7 @@ const Profile: React.FC = () => {
 
     try {
       const method = profileExists ? "PUT" : "POST"
-      const res = await fetch(`http://localhost:5000/api/profile/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}/profile/${userId}`, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -241,7 +248,7 @@ const Profile: React.FC = () => {
     setError("")
 
     try {
-      const res = await fetch(`http://localhost:5000/api/profile/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}/profile/${userId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -291,7 +298,7 @@ const Profile: React.FC = () => {
     formData.append("profilePhoto", croppedBlob, "cropped.jpg")
 
     try {
-      const res = await fetch(`http://localhost:5000/api/profile/${userId}/photo`, {
+      const res = await fetch(`${API_BASE_URL}/profile/${userId}/photo`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -396,7 +403,7 @@ const Profile: React.FC = () => {
                           form.profilePhoto
                             ? form.profilePhoto.startsWith("http")
                               ? form.profilePhoto
-                              : `http://localhost:5000${form.profilePhoto}`
+                              : `${API_BASE_URL.replace(/\/api$/, '')}${form.profilePhoto}`
                             : "/placeholder.svg"
                         }
                         alt="Profile"
@@ -404,7 +411,7 @@ const Profile: React.FC = () => {
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-r from-emerald-400 to-teal-500 flex items-center justify-center">
-                        <span className="text-white text-4xl font-bold">{getInitials(user?.name || "")}</span>
+                        <span className="text-white text-4xl font-bold">{getInitials(form.name || "")}</span>
                       </div>
                     )}
 
@@ -434,7 +441,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div className="text-center text-white space-y-2">
-                  <h2 className="text-3xl font-bold mb-2 animate-slideInUp">{user?.name || "Your Name"}</h2>
+                  <h2 className="text-3xl font-bold mb-2 animate-slideInUp">{form.name || "Your Name"}</h2>
                   {form.nickname && (
                     <p className="text-emerald-100 text-lg mb-1 animate-slideInUp animation-delay-100">
                       "{form.nickname}"
@@ -698,6 +705,19 @@ const Profile: React.FC = () => {
                     <h3 className="text-xl font-semibold text-gray-900">Personal Information</h3>
                   </div>
                   <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-emerald-300"
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-gray-700">Nickname</label>
                       <input

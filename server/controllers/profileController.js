@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const connectionCache = require('../utils/connectioncache');
+const mongoose = require('mongoose');
 
 // Update user status to online
 // Call this when user logs in or connects via socket
@@ -121,6 +122,9 @@ exports.userDisconnected = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
     const user = await User.findById(userId).select('-password -otp -otpExpiresAt');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -251,8 +255,11 @@ exports.getOnlineUsers = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
     const updateFields = {};
-    const allowedFields = ['campus', 'batch', 'profilePhoto', 'gender', 'age', 'aboutMe', 'nickname'];
+    const allowedFields = ['name', 'campus', 'batch', 'profilePhoto', 'gender', 'age', 'aboutMe', 'nickname'];
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) updateFields[field] = req.body[field];
     });
@@ -268,6 +275,9 @@ exports.updateProfile = async (req, res) => {
 exports.deleteProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
     const user = await User.findByIdAndDelete(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json({ message: 'Profile deleted successfully' });
@@ -280,13 +290,16 @@ exports.deleteProfile = async (req, res) => {
 exports.createProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
     const existingUser = await User.findById(userId);
     if (!existingUser) return res.status(404).json({ message: 'User not found' });
     // If profile fields already exist, treat as already created
     if (existingUser.campus || existingUser.batch || existingUser.gender || existingUser.age || existingUser.aboutMe || existingUser.nickname || existingUser.profilePhoto) {
       return res.status(400).json({ message: 'Profile already exists' });
     }
-    const allowedFields = ['campus', 'batch', 'profilePhoto', 'gender', 'age', 'aboutMe', 'nickname'];
+    const allowedFields = ['name', 'campus', 'batch', 'profilePhoto', 'gender', 'age', 'aboutMe', 'nickname'];
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) existingUser[field] = req.body[field];
     });
@@ -300,6 +313,9 @@ exports.createProfile = async (req, res) => {
 exports.uploadProfilePhoto = async (req, res) => {
   try {
     const userId = req.params.userId;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
     const user = await User.findByIdAndUpdate(
