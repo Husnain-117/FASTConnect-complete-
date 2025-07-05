@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@types/emoji-mart": "^3.0.14",
-    "@types/node": "^24.0.7"
+    "@types/node": "^24.0.7",
+    "@types/react-toastify": "^4.0.2"
   }
 }

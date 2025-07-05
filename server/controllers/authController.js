@@ -15,7 +15,7 @@ const validatePassword = (password) => {
 };
 
 const validateNUEmail = (email) => {
-  return email.toLowerCase().endsWith('@gmail.com');
+  return typeof email === 'string' && email.trim().toLowerCase().endsWith('@nu.edu.pk');
 };
 
 const generateToken = (user) => {
@@ -227,6 +227,8 @@ exports.verifyAndRegister = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 exports.forgotPassword = async (req, res) => {
   try {

@@ -1,4 +1,5 @@
 "use client"
+
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
 import Navbar from "./Navbar"
@@ -17,23 +18,58 @@ const About = () => {
   }
 
   const goToProfile = () => {
-    if (userId && userId !== 'undefined') {
-      navigate('/profile')
+    if (userId && userId !== "undefined") {
+      navigate("/profile")
     } else {
-      navigate('/login')
+      navigate("/login")
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#051622] relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <svg className="w-full h-full" style={{ position: "absolute", top: 0, left: 0 }}>
+          <circle cx="15%" cy="25%" r="3" fill="#2dd4bf" opacity="0.12">
+            <animate attributeName="cy" values="25%;75%;25%" dur="14s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.12;0.25;0.12" dur="8s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="85%" cy="40%" r="2.5" fill="#34d399" opacity="0.18">
+            <animate attributeName="cy" values="40%;15%;40%" dur="16s" repeatCount="indefinite" />
+            <animate attributeName="cx" values="85%;80%;85%" dur="12s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="45%" cy="85%" r="4" fill="#2dd4bf" opacity="0.08">
+            <animate attributeName="cy" values="85%;35%;85%" dur="20s" repeatCount="indefinite" />
+            <animate attributeName="r" values="4;6;4" dur="14s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="75%" cy="20%" r="1.8" fill="#34d399" opacity="0.22">
+            <animate attributeName="cy" values="20%;65%;20%" dur="18s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.22;0.35;0.22" dur="10s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="25%" cy="60%" r="3.2" fill="#1BA098" opacity="0.15">
+            <animate attributeName="cx" values="25%;30%;25%" dur="22s" repeatCount="indefinite" />
+            <animate attributeName="cy" values="60%;30%;60%" dur="24s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="60%" cy="10%" r="2.2" fill="#2dd4bf" opacity="0.2">
+            <animate attributeName="cy" values="10%;50%;10%" dur="26s" repeatCount="indefinite" />
+            <animate attributeName="r" values="2.2;3.5;2.2" dur="16s" repeatCount="indefinite" />
+          </circle>
+        </svg>
+      </div>
+
       <Navbar />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
         {/* Hero Section */}
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl mb-8 shadow-lg">
-            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center mb-20 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-3xl mb-8 shadow-2xl shadow-[#1BA098]/25 animate-float">
+            <svg
+              className="w-12 h-12 text-white animate-pulse-subtle"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -42,26 +78,31 @@ const About = () => {
               />
             </svg>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            About <span className="text-emerald-600">Fast Connect</span>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-slide-up" style={{ color: "#DEB992" }}>
+            About <span className="text-[#1BA098] animate-slide-up-delay">FASTConnect</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p
+            className="text-xl max-w-3xl mx-auto leading-relaxed animate-slide-up-delay-2"
+            style={{ color: "#DEB992", opacity: 0.9 }}
+          >
             Empowering Fast University students to build meaningful connections, collaborate on academic projects, and
             foster a unified learning community across all campuses.
           </p>
         </div>
 
         {/* Mission Section */}
-        <div className="mb-20">
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-12">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Mission</h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-teal-600 mx-auto rounded-full"></div>
+        <div className="mb-20 animate-fade-in-delay-1">
+          <div className="bg-[#051622]/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-[#1BA098]/20 p-12 hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500">
+            <div className="text-center mb-12 animate-slide-down">
+              <h2 className="text-3xl font-bold mb-4" style={{ color: "#DEB992" }}>
+                Our Mission
+              </h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-[#1BA098] to-[#159084] mx-auto rounded-full animate-expand"></div>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center group">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center group animate-slide-up-stagger-1 hover:scale-105 transition-all duration-300 p-4 rounded-xl hover:bg-[#1BA098]/10">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg animate-bounce-subtle">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -70,14 +111,19 @@ const About = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Connect Students</h3>
-                <p className="text-gray-600">
+                <h3
+                  className="text-xl font-semibold mb-3 group-hover:text-[#1BA098] transition-colors duration-300"
+                  style={{ color: "#DEB992" }}
+                >
+                  Connect Students
+                </h3>
+                <p style={{ color: "#DEB992", opacity: 0.8 }}>
                   Bridge the gap between students from different campuses and create lasting academic relationships.
                 </p>
               </div>
-              <div className="text-center group">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-teal-100 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center group animate-slide-up-stagger-2 hover:scale-105 transition-all duration-300 p-4 rounded-xl hover:bg-[#1BA098]/10">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#159084] to-[#1BA098] rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg animate-bounce-subtle-delay">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -86,14 +132,19 @@ const About = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Foster Innovation</h3>
-                <p className="text-gray-600">
+                <h3
+                  className="text-xl font-semibold mb-3 group-hover:text-[#1BA098] transition-colors duration-300"
+                  style={{ color: "#DEB992" }}
+                >
+                  Foster Innovation
+                </h3>
+                <p style={{ color: "#DEB992", opacity: 0.8 }}>
                   Encourage collaborative learning and innovative thinking through seamless communication tools.
                 </p>
               </div>
-              <div className="text-center group">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center group animate-slide-up-stagger-3 hover:scale-105 transition-all duration-300 p-4 rounded-xl hover:bg-[#1BA098]/10">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg animate-bounce-subtle-slow">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -102,8 +153,13 @@ const About = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Ensure Security</h3>
-                <p className="text-gray-600">
+                <h3
+                  className="text-xl font-semibold mb-3 group-hover:text-[#1BA098] transition-colors duration-300"
+                  style={{ color: "#DEB992" }}
+                >
+                  Ensure Security
+                </h3>
+                <p style={{ color: "#DEB992", opacity: 0.8 }}>
                   Maintain a safe and secure environment exclusively for verified Fast University students.
                 </p>
               </div>
@@ -112,20 +168,21 @@ const About = () => {
         </div>
 
         {/* Features Section */}
-        <div className="mb-20">
+        <div className="mb-20 animate-fade-in-delay-2">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Platform Features</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold mb-4 animate-slide-up" style={{ color: "#DEB992" }}>
+              Platform Features
+            </h2>
+            <p className="text-xl max-w-2xl mx-auto animate-slide-up-delay" style={{ color: "#DEB992", opacity: 0.9 }}>
               Discover the powerful tools designed to enhance your university experience and academic collaboration.
             </p>
           </div>
-
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Feature 1 */}
-            <div className="space-y-8">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Feature List */}
+            <div className="space-y-8 animate-slide-in-left">
+              <div className="flex items-start space-x-4 group hover:scale-105 transition-all duration-300 p-4 rounded-xl hover:bg-[#1BA098]/10 animate-slide-in-left-stagger-1">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -135,17 +192,21 @@ const About = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">HD Video Conferencing</h3>
-                  <p className="text-gray-600">
+                  <h3
+                    className="text-xl font-semibold mb-2 group-hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992" }}
+                  >
+                    HD Video Conferencing
+                  </h3>
+                  <p style={{ color: "#DEB992", opacity: 0.8 }}>
                     Crystal clear video calls with advanced features for group discussions, presentations, and virtual
                     study sessions.
                   </p>
                 </div>
               </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-start space-x-4 group hover:scale-105 transition-all duration-300 p-4 rounded-xl hover:bg-[#1BA098]/10 animate-slide-in-left-stagger-2">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-[#159084] to-[#1BA098] rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -155,17 +216,21 @@ const About = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Voice Communication</h3>
-                  <p className="text-gray-600">
+                  <h3
+                    className="text-xl font-semibold mb-2 group-hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992" }}
+                  >
+                    Voice Communication
+                  </h3>
+                  <p style={{ color: "#DEB992", opacity: 0.8 }}>
                     High-quality voice calls for quick consultations, study group coordination, and instant academic
                     support.
                   </p>
                 </div>
               </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-start space-x-4 group hover:scale-105 transition-all duration-300 p-4 rounded-xl hover:bg-[#1BA098]/10 animate-slide-in-left-stagger-3">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -175,18 +240,27 @@ const About = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Campus Integration</h3>
-                  <p className="text-gray-600">
+                  <h3
+                    className="text-xl font-semibold mb-2 group-hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992" }}
+                  >
+                    Campus Integration
+                  </h3>
+                  <p style={{ color: "#DEB992", opacity: 0.8 }}>
                     Seamlessly connect with students from all Fast University campuses across Pakistan.
                   </p>
                 </div>
               </div>
             </div>
-
             {/* Feature Visual */}
-            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-12 text-center">
-              <div className="inline-flex items-center justify-center w-32 h-32 bg-white rounded-full shadow-lg mb-8">
-                <svg className="w-16 h-16 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-[#1BA098]/20 to-[#159084]/20 backdrop-blur-sm rounded-3xl p-12 text-center border border-[#1BA098]/20 hover:border-[#1BA098]/40 transition-all duration-500 hover:scale-105 animate-slide-in-right">
+              <div className="inline-flex items-center justify-center w-32 h-32 bg-[#051622]/80 backdrop-blur-sm rounded-full shadow-2xl shadow-[#1BA098]/25 mb-8 animate-float">
+                <svg
+                  className="w-16 h-16 text-[#1BA098] animate-pulse-subtle"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -195,8 +269,10 @@ const About = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Nationwide Network</h3>
-              <p className="text-gray-600 text-lg">
+              <h3 className="text-2xl font-bold mb-4" style={{ color: "#DEB992" }}>
+                Nationwide Network
+              </h3>
+              <p className="text-lg" style={{ color: "#DEB992", opacity: 0.8 }}>
                 Connect with over 50,000+ Fast University students across 7 major campuses in Pakistan.
               </p>
             </div>
@@ -204,47 +280,48 @@ const About = () => {
         </div>
 
         {/* Statistics Section */}
-        <div className="mb-20">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-12 text-white">
-            <div className="text-center mb-12">
+        <div className="mb-20 animate-fade-in-delay-3">
+          <div className="bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-3xl p-12 text-white shadow-2xl shadow-[#1BA098]/25 hover:shadow-[#1BA098]/35 transition-all duration-500 hover:scale-105">
+            <div className="text-center mb-12 animate-slide-down">
               <h2 className="text-3xl font-bold mb-4">Platform Impact</h2>
-              <p className="text-emerald-100 text-lg">Making a difference in the Fast University community</p>
+              <p className="text-[#DEB992]/80 text-lg">Making a difference in the Fast University community</p>
             </div>
             <div className="grid md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div className="text-4xl font-bold mb-2">50,000+</div>
-                <div className="text-emerald-100">Active Students</div>
+              <div className="animate-slide-up-stagger-1 hover:scale-110 transition-all duration-300">
+                <div className="text-4xl font-bold mb-2 animate-counter">50,000+</div>
+                <div className="text-[#DEB992]/80">Active Students</div>
               </div>
-              <div>
-                <div className="text-4xl font-bold mb-2">7</div>
-                <div className="text-emerald-100">Campuses Connected</div>
+              <div className="animate-slide-up-stagger-2 hover:scale-110 transition-all duration-300">
+                <div className="text-4xl font-bold mb-2 animate-counter-delay">7</div>
+                <div className="text-[#DEB992]/80">Campuses Connected</div>
               </div>
-              <div>
-                <div className="text-4xl font-bold mb-2">100,000+</div>
-                <div className="text-emerald-100">Successful Connections</div>
+              <div className="animate-slide-up-stagger-3 hover:scale-110 transition-all duration-300">
+                <div className="text-4xl font-bold mb-2 animate-counter-slow">100,000+</div>
+                <div className="text-[#DEB992]/80">Successful Connections</div>
               </div>
-              <div>
-                <div className="text-4xl font-bold mb-2">99.9%</div>
-                <div className="text-emerald-100">Uptime Reliability</div>
+              <div className="animate-slide-up-stagger-4 hover:scale-110 transition-all duration-300">
+                <div className="text-4xl font-bold mb-2 animate-counter-fast">99.9%</div>
+                <div className="text-[#DEB992]/80">Uptime Reliability</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Team Section */}
-        <div className="mb-20">
+        <div className="mb-20 animate-fade-in-delay-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Commitment</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Fast Connect is developed and maintained by a dedicated team committed to enhancing the educational
+            <h2 className="text-4xl font-bold mb-4 animate-slide-up" style={{ color: "#DEB992" }}>
+              Our Commitment
+            </h2>
+            <p className="text-xl max-w-3xl mx-auto animate-slide-up-delay" style={{ color: "#DEB992", opacity: 0.9 }}>
+              FASTConnect is developed and maintained by a dedicated team committed to enhancing the educational
               experience of Fast University students.
             </p>
           </div>
-
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center hover:shadow-xl transition-shadow duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-full mb-6">
-                <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-[#051622]/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-[#1BA098]/20 p-8 text-center hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-[#1BA098]/40 group animate-slide-up-stagger-1">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-full mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg animate-bounce-subtle">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -253,15 +330,19 @@ const About = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">24/7 Support</h3>
-              <p className="text-gray-600">
+              <h3
+                className="text-xl font-semibold mb-3 group-hover:text-[#1BA098] transition-colors duration-300"
+                style={{ color: "#DEB992" }}
+              >
+                24/7 Support
+              </h3>
+              <p style={{ color: "#DEB992", opacity: 0.8 }}>
                 Round-the-clock technical support to ensure uninterrupted communication for all students.
               </p>
             </div>
-
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center hover:shadow-xl transition-shadow duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-teal-100 rounded-full mb-6">
-                <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-[#051622]/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-[#1BA098]/20 p-8 text-center hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-[#1BA098]/40 group animate-slide-up-stagger-2">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#159084] to-[#1BA098] rounded-full mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg animate-bounce-subtle-delay">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -270,20 +351,29 @@ const About = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Student-Centric</h3>
-              <p className="text-gray-600">
+              <h3
+                className="text-xl font-semibold mb-3 group-hover:text-[#1BA098] transition-colors duration-300"
+                style={{ color: "#DEB992" }}
+              >
+                Student-Centric
+              </h3>
+              <p style={{ color: "#DEB992", opacity: 0.8 }}>
                 Every feature is designed with student needs in mind, prioritizing academic success and collaboration.
               </p>
             </div>
-
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center hover:shadow-xl transition-shadow duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-[#051622]/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-[#1BA098]/20 p-8 text-center hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-[#1BA098]/40 group animate-slide-up-stagger-3">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-full mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg animate-bounce-subtle-slow">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Continuous Innovation</h3>
-              <p className="text-gray-600">
+              <h3
+                className="text-xl font-semibold mb-3 group-hover:text-[#1BA098] transition-colors duration-300"
+                style={{ color: "#DEB992" }}
+              >
+                Continuous Innovation
+              </h3>
+              <p style={{ color: "#DEB992", opacity: 0.8 }}>
                 Regular updates and new features based on student feedback and emerging educational technologies.
               </p>
             </div>
@@ -291,17 +381,22 @@ const About = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center">
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Connect?</h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join thousands of Fast University students who are already using Fast Connect to enhance their academic
+        <div className="text-center animate-fade-in-delay-5">
+          <div className="bg-[#051622]/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-[#1BA098]/20 p-12 hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500 hover:scale-105">
+            <h2 className="text-3xl font-bold mb-4 animate-slide-up" style={{ color: "#DEB992" }}>
+              Ready to Connect?
+            </h2>
+            <p
+              className="text-xl mb-8 max-w-2xl mx-auto animate-slide-up-delay"
+              style={{ color: "#DEB992", opacity: 0.9 }}
+            >
+              Join thousands of Fast University students who are already using FASTConnect to enhance their academic
               journey.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up-delay-2">
               <a
-                href="/video-call"
-                className="inline-flex items-center px-8 py-4 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200"
+                href="/videochat"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#1BA098] to-[#159084] text-[#051622] rounded-xl font-bold hover:from-[#159084] hover:to-[#1BA098] focus:outline-none focus:ring-2 focus:ring-[#1BA098] focus:ring-offset-2 focus:ring-offset-[#051622] transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-[#1BA098]/25 active:scale-95"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -314,8 +409,8 @@ const About = () => {
                 Start Video Chat
               </a>
               <a
-                href="/voice-call"
-                className="inline-flex items-center px-8 py-4 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors duration-200"
+                href="/voice-chat"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#159084] to-[#1BA098] text-[#051622] rounded-xl font-bold hover:from-[#1BA098] hover:to-[#159084] focus:outline-none focus:ring-2 focus:ring-[#1BA098] focus:ring-offset-2 focus:ring-offset-[#051622] transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-[#1BA098]/25 active:scale-95"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -333,12 +428,12 @@ const About = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
+      <footer className="bg-[#051622]/90 backdrop-blur-sm border-t border-[#1BA098]/20 mt-16 animate-fade-in-delay-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid md:grid-cols-4 gap-8">
-            <div className="col-span-2">
+            <div className="col-span-2 animate-slide-in-left">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
+                <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-lg shadow-lg animate-pulse-subtle">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
@@ -348,62 +443,98 @@ const About = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Fast Connect</h3>
+                <h3 className="text-xl font-bold" style={{ color: "#DEB992" }}>
+                  FASTConnect
+                </h3>
               </div>
-              <p className="text-gray-600 mb-4">
+              <p className="mb-4" style={{ color: "#DEB992", opacity: 0.8 }}>
                 Connecting Fast University students across Pakistan through secure and professional communication tools.
               </p>
-              <p className="text-sm text-gray-500">
-                &copy; 2024 Fast Connect. Exclusively for Fast University Students. All rights reserved.
+              <p className="text-sm" style={{ color: "#DEB992", opacity: 0.6 }}>
+                &copy; 2024 FASTConnect. Exclusively for Fast University Students. All rights reserved.
               </p>
             </div>
-
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-600">
+            <div className="animate-slide-in-right-stagger-1">
+              <h4 className="text-lg font-semibold mb-4" style={{ color: "#DEB992" }}>
+                Quick Links
+              </h4>
+              <ul className="space-y-2">
                 <li>
-                  <a href={userId && userId !== 'undefined' ? '/profile' : '/login'} className="hover:text-emerald-600 transition-colors">
+                  <a
+                    href={userId && userId !== "undefined" ? "/profile" : "/login"}
+                    className="hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992", opacity: 0.8 }}
+                  >
                     Profile
                   </a>
                 </li>
                 <li>
-                  <a href="/video-call" className="hover:text-emerald-600 transition-colors">
+                  <a
+                    href="/videochat"
+                    className="hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992", opacity: 0.8 }}
+                  >
                     Video Chat
                   </a>
                 </li>
                 <li>
-                  <a href="/voice-call" className="hover:text-emerald-600 transition-colors">
+                  <a
+                    href="/voicechat"
+                    className="hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992", opacity: 0.8 }}
+                  >
                     Voice Chat
                   </a>
                 </li>
                 <li>
-                  <a href="/guidelines" className="hover:text-emerald-600 transition-colors">
+                  <a
+                    href="/guidelines"
+                    className="hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992", opacity: 0.8 }}
+                  >
                     Guidelines
                   </a>
                 </li>
               </ul>
             </div>
-
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-600">
+            <div className="animate-slide-in-right-stagger-2">
+              <h4 className="text-lg font-semibold mb-4" style={{ color: "#DEB992" }}>
+                Support
+              </h4>
+              <ul className="space-y-2">
                 <li>
-                  <a href="/support" className="hover:text-emerald-600 transition-colors">
+                  <a
+                    href="/support"
+                    className="hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992", opacity: 0.8 }}
+                  >
                     Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="/contact" className="hover:text-emerald-600 transition-colors">
+                  <a
+                    href="/contact"
+                    className="hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992", opacity: 0.8 }}
+                  >
                     Contact Us
                   </a>
                 </li>
                 <li>
-                  <a href="/privacy" className="hover:text-emerald-600 transition-colors">
+                  <a
+                    href="/privacy"
+                    className="hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992", opacity: 0.8 }}
+                  >
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a href="/terms" className="hover:text-emerald-600 transition-colors">
+                  <a
+                    href="/terms"
+                    className="hover:text-[#1BA098] transition-colors duration-300"
+                    style={{ color: "#DEB992", opacity: 0.8 }}
+                  >
                     Terms of Service
                   </a>
                 </li>
@@ -412,6 +543,95 @@ const About = () => {
           </div>
         </div>
       </footer>
+
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-up {
+          from { opacity: 0; transform: translateY(40px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-down {
+          from { opacity: 0; transform: translateY(-30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-in-left {
+          from { opacity: 0; transform: translateX(-40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slide-in-right {
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes bounce-subtle {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes pulse-subtle {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        @keyframes expand {
+          from { width: 0; }
+          to { width: 6rem; }
+        }
+        
+        @keyframes counter {
+          from { transform: scale(0.8); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-fade-in { animation: fade-in 0.8s ease-out; }
+        .animate-slide-up { animation: slide-up 0.8s ease-out; }
+        .animate-slide-down { animation: slide-down 0.8s ease-out; }
+        .animate-slide-in-left { animation: slide-in-left 0.8s ease-out; }
+        .animate-slide-in-right { animation: slide-in-right 0.8s ease-out; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+        .animate-bounce-subtle-delay { animation: bounce-subtle 2s ease-in-out infinite 0.5s; }
+        .animate-bounce-subtle-slow { animation: bounce-subtle 3s ease-in-out infinite; }
+        .animate-pulse-subtle { animation: pulse-subtle 3s ease-in-out infinite; }
+        .animate-expand { animation: expand 1s ease-out 0.5s both; }
+        .animate-counter { animation: counter 0.8s ease-out 1.2s both; }
+        .animate-counter-delay { animation: counter 0.8s ease-out 1.4s both; }
+        .animate-counter-slow { animation: counter 0.8s ease-out 1.6s both; }
+        .animate-counter-fast { animation: counter 0.8s ease-out 1.8s both; }
+        
+        .animate-fade-in-delay-1 { animation: fade-in 0.8s ease-out 0.2s both; }
+        .animate-fade-in-delay-2 { animation: fade-in 0.8s ease-out 0.4s both; }
+        .animate-fade-in-delay-3 { animation: fade-in 0.8s ease-out 0.6s both; }
+        .animate-fade-in-delay-4 { animation: fade-in 0.8s ease-out 0.8s both; }
+        .animate-fade-in-delay-5 { animation: fade-in 0.8s ease-out 1s both; }
+        .animate-fade-in-delay-6 { animation: fade-in 0.8s ease-out 1.2s both; }
+        
+        .animate-slide-up-delay { animation: slide-up 0.8s ease-out 0.3s both; }
+        .animate-slide-up-delay-2 { animation: slide-up 0.8s ease-out 0.5s both; }
+        .animate-slide-up-stagger-1 { animation: slide-up 0.8s ease-out 0.7s both; }
+        .animate-slide-up-stagger-2 { animation: slide-up 0.8s ease-out 0.9s both; }
+        .animate-slide-up-stagger-3 { animation: slide-up 0.8s ease-out 1.1s both; }
+        .animate-slide-up-stagger-4 { animation: slide-up 0.8s ease-out 1.3s both; }
+        
+        .animate-slide-in-left-stagger-1 { animation: slide-in-left 0.8s ease-out 0.8s both; }
+        .animate-slide-in-left-stagger-2 { animation: slide-in-left 0.8s ease-out 1s both; }
+        .animate-slide-in-left-stagger-3 { animation: slide-in-left 0.8s ease-out 1.2s both; }
+        
+        .animate-slide-in-right-stagger-1 { animation: slide-in-right 0.8s ease-out 1.4s both; }
+        .animate-slide-in-right-stagger-2 { animation: slide-in-right 0.8s ease-out 1.6s both; }
+      `}</style>
     </div>
   )
 }

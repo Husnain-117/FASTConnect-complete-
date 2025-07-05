@@ -166,6 +166,26 @@ const setupSocket = (io) => {
       io.emit('voice-chat-users', Array.from(io.sockets.sockets.values()).map(s => s.user).filter(Boolean));
     });
 
+    // --- End Chat Relay ---
+    socket.on('chat-ended', ({ to, name }) => {
+      // Relay to the peer if exists
+      const peerSocket = io.sockets.sockets.get(to);
+      if (peerSocket) {
+        peerSocket.emit('chat-ended', { by: socket.id, name });
+      }
+      // Clean up active match for both sides
+      const match = activeMatches.get(socket.id);
+      if (match) {
+        activeMatches.delete(socket.id);
+        activeMatches.delete(match.peer);
+      }
+      const peerMatch = activeMatches.get(to);
+      if (peerMatch) {
+        activeMatches.delete(to);
+        activeMatches.delete(peerMatch.peer);
+      }
+    });
+
     // --- WebRTC Signaling Relay ---
     socket.on('offer', ({ offer, to }) => {
       console.log(`[WebRTC] Offer relayed from ${socket.id} to ${to}`);

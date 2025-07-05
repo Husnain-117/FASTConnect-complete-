@@ -2,90 +2,13 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { io, type Socket } from "socket.io-client"
 import axiosInstance from "../api/axiosConfig"
 import { useAuth } from "../context/AuthContext"
 import Navbar from "./Navbar"
 import { useSocket } from "../contexts/SocketContext"
-import { getOnlineUsers } from '../api/userApi'
-import type { User } from '../types/User'
-import Picker from '@emoji-mart/react'
-import data from '@emoji-mart/data'
-import API_BASE_URL from '../config/apiBaseUrl'
-
-// Add this after the imports and before the component
-const styles = `
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes slideInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-30px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(30px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-  
-  @keyframes bounce {
-    0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
-    40%, 43% { transform: translate3d(0,-30px,0); }
-    70% { transform: translate3d(0,-15px,0); }
-    90% { transform: translate3d(0,-4px,0); }
-  }
-  
-  .animate-fadeIn {
-    animation: fadeIn 0.6s ease-out;
-  }
-  
-  .animate-slideInUp {
-    animation: slideInUp 0.6s ease-out;
-  }
-  
-  .animate-slideInLeft {
-    animation: slideInLeft 0.4s ease-out;
-  }
-  
-  .animate-slideInRight {
-    animation: slideInRight 0.4s ease-out;
-  }
-  
-  .animation-delay-100 {
-    animation-delay: 0.1s;
-    animation-fill-mode: both;
-  }
-  
-  .animation-delay-200 {
-    animation-delay: 0.2s;
-    animation-fill-mode: both;
-  }
-  
-  .animation-delay-300 {
-    animation-delay: 0.3s;
-    animation-fill-mode: both;
-  }
-  
-  .animate-pulse-slow {
-    animation: pulse 2s infinite;
-  }
-  
-  .animate-bounce-slow {
-    animation: bounce 2s infinite;
-  }
-`
+import Picker from "@emoji-mart/react"
+import data from "@emoji-mart/data"
+import API_BASE_URL from "../config/apiBaseUrl"
 
 interface Message {
   _id: string
@@ -100,50 +23,51 @@ interface Message {
 }
 
 const FILTERS = [
-  { label: "Today", value: "today" },
-  { label: "Yesterday", value: "yesterday" },
-  { label: "This Week", value: "week" },
-  { label: "Last 7 Days", value: "last7" },
-  { label: "This Month", value: "month" },
-  { label: "Custom", value: "custom" },
-  { label: "All", value: "all" },
-];
+  { label: "Today", value: "today", icon: "📅" },
+  { label: "Yesterday", value: "yesterday", icon: "📆" },
+  { label: "This Week", value: "week", icon: "📊" },
+  { label: "Last 7 Days", value: "last7", icon: "📈" },
+  { label: "This Month", value: "month", icon: "🗓️" },
+  { label: "All", value: "all", icon: "💬" },
+]
 
 function isToday(date: Date) {
-  const now = new Date();
-  return date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear();
+  const now = new Date()
+  return (
+    date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
+  )
 }
 
 function isYesterday(date: Date) {
-  const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  return date.getDate() === yesterday.getDate() &&
+  const now = new Date()
+  const yesterday = new Date(now)
+  yesterday.setDate(now.getDate() - 1)
+  return (
+    date.getDate() === yesterday.getDate() &&
     date.getMonth() === yesterday.getMonth() &&
-    date.getFullYear() === yesterday.getFullYear();
+    date.getFullYear() === yesterday.getFullYear()
+  )
 }
 
 function isThisWeek(date: Date) {
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
-  startOfWeek.setHours(0, 0, 0, 0);
-  return date >= startOfWeek && date <= now;
+  const now = new Date()
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - now.getDay()) // Sunday
+  startOfWeek.setHours(0, 0, 0, 0)
+  return date >= startOfWeek && date <= now
 }
 
 function isLast7Days(date: Date) {
-  const now = new Date();
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(now.getDate() - 6); // includes today
-  sevenDaysAgo.setHours(0, 0, 0, 0);
-  return date >= sevenDaysAgo && date <= now;
+  const now = new Date()
+  const sevenDaysAgo = new Date(now)
+  sevenDaysAgo.setDate(now.getDate() - 6) // includes today
+  sevenDaysAgo.setHours(0, 0, 0, 0)
+  return date >= sevenDaysAgo && date <= now
 }
 
 function isThisMonth(date: Date) {
-  const now = new Date();
-  return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  const now = new Date()
+  return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
 }
 
 const TextChat: React.FC = () => {
@@ -156,28 +80,26 @@ const TextChat: React.FC = () => {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const { socket } = useSocket()
   const { user, token } = useAuth()
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [filter, setFilter] = useState<string>("all");
-  const [customStart, setCustomStart] = useState<string>("");
-  const [customEnd, setCustomEnd] = useState<string>("");
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const [onlineUsersError, setOnlineUsersError] = useState<string | null>(null);
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [filter, setFilter] = useState<string>("all")
+  const [customStart, setCustomStart] = useState<string>("")
+  const [customEnd, setCustomEnd] = useState<string>("")
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([])
+  const [onlineUsersError, setOnlineUsersError] = useState<string | null>(null)
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(false)
 
-  // Add this right after the component declaration
-  useEffect(() => {
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = styles;
-    document.head.appendChild(styleSheet);
-    
-    // Return a cleanup function that removes the style element
-    return () => {
-      if (styleSheet && document.head.contains(styleSheet)) {
-        document.head.removeChild(styleSheet);
-      }
-    };
-  }, []);
+  // Helper function to check if input should be disabled
+  const isInputDisabled = () => {
+    return filter !== "today" && filter !== "all"
+  }
+
+  // Helper function to get the disabled message
+  const getDisabledMessage = () => {
+    if (filter === "today" || filter === "all") return ""
+    return "Switch to 'Today' or 'All' to send messages"
+  }
 
   // Fetch initial messages
   useEffect(() => {
@@ -192,112 +114,93 @@ const TextChat: React.FC = () => {
         setLoading(false)
       }
     }
-
     fetchMessages()
   }, [])
 
   // Set up socket event listeners
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) return
 
     const handleNewMessage = (message: Message) => {
-      console.log('[Socket] Received new_message:', message);
-      setMessages((prev) => [...prev, message]);
-    };
+      console.log("[Socket] Received new_message:", message)
+      setMessages((prev) => [...prev, message])
+    }
 
-    socket.on('new_message', handleNewMessage);
+    socket.on("new_message", handleNewMessage)
 
-    // Optionally handle reconnection
-    socket.on('connect', () => {
+    socket.on("connect", () => {
       // Optionally re-fetch messages or notify user
-      // fetchMessages();
-      
-    });
+    })
 
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       // Optionally notify user of disconnect
-    });
+    })
 
     return () => {
-      socket.off('new_message', handleNewMessage);
-      socket.off('connect');
-      socket.off('disconnect');
-    };
-  }, [socket]);
+      socket.off("new_message", handleNewMessage)
+      socket.off("connect")
+      socket.off("disconnect")
+    }
+  }, [socket])
 
   // Auto-scroll to bottom when messages change, but only if user is near the bottom
   useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-    // Only scroll if NOT already at the bottom (allow a small threshold)
-    const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10;
+    const container = messagesContainerRef.current
+    if (!container) return
+    const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10
     if (isAtBottom) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "auto" }); // Use 'auto' for instant, no shake
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
     }
-  }, [messages]);
+  }, [messages])
 
   // Track if user is not at the bottom, show scroll-to-bottom button
   useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
+    const container = messagesContainerRef.current
+    if (!container) return
+
     const handleScroll = () => {
-      const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10;
-      setShowScrollToBottom(!isAtBottom);
-    };
-    container.addEventListener('scroll', handleScroll);
-    // Initial check
-    handleScroll();
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
+      const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10
+      setShowScrollToBottom(!isAtBottom)
+    }
 
-  // Also update showScrollToBottom when messages change (e.g., after sending/receiving)
+    container.addEventListener("scroll", handleScroll)
+    handleScroll()
+
+    return () => container.removeEventListener("scroll", handleScroll)
+  }, [])
+
   useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-    const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10;
-    setShowScrollToBottom(!isAtBottom);
-  }, [messages]);
+    const container = messagesContainerRef.current
+    if (!container) return
+    const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 10
+    setShowScrollToBottom(!isAtBottom)
+  }, [messages])
 
-  const handleScrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    // After scrolling, the scroll event will fire and hide the button if at bottom
-  };
+  const handleScrollToBottom = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
 
   const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !user) return;
+    e.preventDefault()
+    if (!newMessage.trim() || !user) return
 
-    // Create optimistic message
-    const optimisticMessage: Message = {
-      _id: `temp-${Date.now()}`,
-      text: newMessage,
-      sender: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-      },
-      timestamp: new Date().toISOString(),
-    };
+    const messageText = newMessage
+    setNewMessage("")
 
-    setMessages(prev => [...prev, optimisticMessage]);
-    const messageText = newMessage;
-    setNewMessage("");
-    // Refocus the input after sending
-    inputRef.current?.focus();
+    inputRef.current?.focus()
 
     try {
-      // Send message to server
-      const response = await axiosInstance.post("/messages/send", { text: messageText });
+      const response = await axiosInstance.post("/messages/send", { text: messageText })
       if (!response.data.success) {
-        throw new Error('Failed to send message');
+        throw new Error("Failed to send message")
       }
-      // The socket "new_message" event will update the messages
     } catch (err) {
-      setError("Failed to send message");
-      setMessages(prev => prev.filter(msg => msg._id !== optimisticMessage._id));
+      setError("Failed to send message")
+      setNewMessage(messageText)
     }
-  };
+  }
 
   const getInitials = (name: string) => {
     return name
@@ -310,59 +213,67 @@ const TextChat: React.FC = () => {
       : "U"
   }
 
-  const filteredMessages = messages.filter(msg => {
-    const msgDate = new Date(msg.timestamp);
-    if (filter === "today") return isToday(msgDate);
-    if (filter === "yesterday") return isYesterday(msgDate);
-    if (filter === "week") return isThisWeek(msgDate);
-    if (filter === "last7") return isLast7Days(msgDate);
-    if (filter === "month") return isThisMonth(msgDate);
+  const filteredMessages = messages.filter((msg) => {
+    const msgDate = new Date(msg.timestamp)
+    if (filter === "today") return isToday(msgDate)
+    if (filter === "yesterday") return isYesterday(msgDate)
+    if (filter === "week") return isThisWeek(msgDate)
+    if (filter === "last7") return isLast7Days(msgDate)
+    if (filter === "month") return isThisMonth(msgDate)
     if (filter === "custom" && customStart && customEnd) {
-      const start = new Date(customStart);
-      const end = new Date(customEnd);
-      end.setHours(23, 59, 59, 999);
-      return msgDate >= start && msgDate <= end;
+      const start = new Date(customStart)
+      const end = new Date(customEnd)
+      end.setHours(23, 59, 59, 999)
+      return msgDate >= start && msgDate <= end
     }
-    return true;
-  });
+    return true
+  })
 
-  // Copy-paste logic from SearchPage.tsx
   const fetchOnlineUsers = async () => {
     if (!token) {
-      setOnlineUsersError('No auth token');
-      return [];
+      setOnlineUsersError("No auth token")
+      return []
     }
     try {
-      console.log('Token used for fetch:', token);
       const res = await fetch(`${API_BASE_URL}/profile/online`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-      });
-      if (!res.ok) throw new Error('Failed to fetch online users');
-      const response = await res.json();
+      })
+      if (!res.ok) throw new Error("Failed to fetch online users")
+      const response = await res.json()
       if (!response.success || !Array.isArray(response.users)) {
-        console.error('Unexpected response format:', response);
-        return [];
+        console.error("Unexpected response format:", response)
+        return []
       }
-      return response.users.map((user: any) => user._id);
+      return response.users.map((user: any) => user._id)
     } catch (err) {
-      console.error('Error fetching online users:', err);
-      setOnlineUsersError('Failed to load online users');
-      return [];
+      console.error("Error fetching online users:", err)
+      setOnlineUsersError("Failed to load online users")
+      return []
     }
-  };
+  }
 
   useEffect(() => {
-    if (!token) return;
-    fetchOnlineUsers().then(setOnlineUsers);
-  }, [token]);
+    if (!token) return
+    fetchOnlineUsers().then(setOnlineUsers)
+  }, [token])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-teal-50 flex items-center justify-center">
-        <div className="text-center animate-fadeIn">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full mb-4 animate-pulse-slow">
+      <div className="min-h-screen bg-[#051622] flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <svg className="w-full h-full" style={{ position: "absolute", top: 0, left: 0 }}>
+            <circle cx="15%" cy="25%" r="3" fill="#2dd4bf" opacity="0.12">
+              <animate attributeName="cy" values="25%;75%;25%" dur="14s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="85%" cy="40%" r="2.5" fill="#34d399" opacity="0.18">
+              <animate attributeName="cy" values="40%;15%;40%" dur="16s" repeatCount="indefinite" />
+            </circle>
+          </svg>
+        </div>
+        <div className="text-center animate-fade-in relative z-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-full mb-4 animate-pulse-subtle shadow-2xl shadow-[#1BA098]/25">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -372,113 +283,52 @@ const TextChat: React.FC = () => {
               />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Chat...</h2>
-          <p className="text-gray-600">Connecting to Fast Connect Chat</p>
+          <h2 className="text-xl font-semibold mb-2" style={{ color: "#DEB992" }}>
+            Connecting to Chat...
+          </h2>
+          <p style={{ color: "#DEB992", opacity: 0.8 }}>Please wait while we connect you</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-teal-50">
-      <Navbar />
+    <div className="h-screen bg-[#051622] relative overflow-hidden flex flex-col">
+      {/* Animated Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <svg className="w-full h-full" style={{ position: "absolute", top: 0, left: 0 }}>
+          <circle cx="10%" cy="18%" r="3.5" fill="#2dd4bf" opacity="0.08">
+            <animate attributeName="cy" values="18%;82%;18%" dur="20s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.08;0.15;0.08" dur="12s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="90%" cy="30%" r="2.8" fill="#34d399" opacity="0.1">
+            <animate attributeName="cy" values="30%;8%;30%" dur="22s" repeatCount="indefinite" />
+            <animate attributeName="cx" values="90%;85%;90%" dur="18s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="40%" cy="90%" r="4.2" fill="#2dd4bf" opacity="0.06">
+            <animate attributeName="cy" values="90%;25%;90%" dur="26s" repeatCount="indefinite" />
+            <animate attributeName="r" values="4.2;6.8;4.2" dur="20s" repeatCount="indefinite" />
+          </circle>
+        </svg>
+      </div>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Hero Section */}
-        <div className="text-center mb-12 animate-fadeIn">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl mb-8">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Fast Connect <span className="text-emerald-600">Global Chat</span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Connect and communicate with fellow Fast University students in real-time. Share ideas, collaborate on
-            projects, and build lasting academic relationships.
-          </p>
-        </div>
+      {/* Fixed Navbar */}
+      <div className="flex-shrink-0 relative z-10">
+        <Navbar />
+      </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl animate-fadeIn">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-red-700 text-sm font-medium">{error}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Filter Buttons */}
-        <div className="flex flex-wrap gap-2 mb-4 items-center">
-          {FILTERS.map(f => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`px-4 py-2 rounded-lg font-semibold border transition-colors duration-200 ${filter === f.value ? 'bg-emerald-500 text-white border-emerald-600 shadow-md' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'} ${f.value === 'custom' ? 'relative z-10' : ''}`}
-              style={f.value === 'custom' ? { minWidth: 90, fontWeight: 700, letterSpacing: 0.5 } : {}}
-            >
-              {f.label}
-            </button>
-          ))}
-          {filter === 'custom' && (
-            <div className="flex items-center gap-2 bg-white border border-emerald-200 rounded-lg px-3 py-1 ml-1 shadow-sm">
-              <input
-                type="date"
-                value={customStart}
-                onChange={e => setCustomStart(e.target.value)}
-                className="px-2 py-1 border border-emerald-400 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                max={customEnd || undefined}
-                style={{ colorScheme: 'light' }}
-              />
-              <span className="mx-1 text-gray-500">to</span>
-              <input
-                type="date"
-                value={customEnd}
-                onChange={e => setCustomEnd(e.target.value)}
-                className="px-2 py-1 border border-emerald-400 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                min={customStart || undefined}
-                style={{ colorScheme: 'light' }}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Chat Container */}
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden animate-slideInUp animation-delay-100">
-          {/* Chat Header */}
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                {onlineUsers.length > 0 ? (
-                  <div className="text-emerald-100 text-sm">{onlineUsers.length} users online</div>
-                ) : (
-                  <div className="text-emerald-100 text-sm">No users online</div>
-                )}
-              </div>
-              <div className="text-white text-lg font-bold">University Global Chat</div>
-            </div>
-          </div>
-
-          {/* Messages Container */}
-          <div ref={messagesContainerRef} className="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50 relative">
-            {filteredMessages.length === 0 ? (
-              <div className="text-center py-12 animate-fadeIn">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Main Chat Layout - Fixed Height */}
+      <div className="flex flex-1 relative z-10 overflow-hidden">
+        {/* Sidebar */}
+        <div
+          className={`${showSidebar ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:relative z-30 w-80 h-full bg-[#051622]/95 backdrop-blur-sm border-r border-[#1BA098]/20 transition-transform duration-300 ease-in-out flex flex-col`}
+        >
+          <div className="p-6 flex-1 flex flex-col overflow-hidden">
+            {/* Chat Room Header */}
+            <div className="flex-shrink-0 mb-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -487,221 +337,366 @@ const TextChat: React.FC = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No messages for this filter</h3>
-                <p className="text-gray-600">Try another filter or send a new message!</p>
+                <div>
+                  <h2 className="text-xl font-bold" style={{ color: "#DEB992" }}>
+                    Fast Connect
+                  </h2>
+                  <p className="text-sm" style={{ color: "#DEB992", opacity: 0.7 }}>
+                    Global Chat Room
+                  </p>
+                </div>
               </div>
-            ) : (
-              filteredMessages.map((message, index) => {
-                const isOwnMessage = message.sender._id === user?._id
-                return (
-                  <div
-                    key={message._id}
-                    className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`flex items-end space-x-2 max-w-xs md:max-w-md lg:max-w-lg ${isOwnMessage ? "flex-row-reverse space-x-reverse" : ""}`}
-                    >
-                      {/* Avatar */}
-                      <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-xs font-bold">{getInitials(message.sender.name)}</span>
-                      </div>
 
-                      {/* Message Bubble */}
+              {/* Online Status */}
+              <div className="flex items-center space-x-2 p-3 bg-[#1BA098]/10 backdrop-blur-sm rounded-xl border border-[#1BA098]/20">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium" style={{ color: "#DEB992" }}>
+                  {onlineUsers.length} students online
+                </span>
+              </div>
+            </div>
+
+            {/* Message Filters - Scrollable */}
+            <div className="flex-1 overflow-y-auto">
+              <h3 className="text-sm font-semibold mb-3" style={{ color: "#DEB992", opacity: 0.8 }}>
+                MESSAGE FILTERS
+              </h3>
+              <div className="space-y-2 pb-4">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => setFilter(f.value)}
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
+                      filter === f.value
+                        ? "bg-gradient-to-r from-[#1BA098] to-[#159084] text-[#051622] shadow-lg"
+                        : "text-[#DEB992] hover:bg-[#1BA098]/10 border border-transparent hover:border-[#1BA098]/20"
+                    }`}
+                  >
+                    <span className="text-lg">{f.icon}</span>
+                    <span className="font-medium">{f.label}</span>
+                    {filter === f.value && <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Stats - Fixed at bottom */}
+            <div className="flex-shrink-0 mt-4">
+              <div className="bg-[#051622]/60 backdrop-blur-sm rounded-xl p-4 border border-[#1BA098]/20">
+                <div className="text-center">
+                  <div className="text-2xl font-bold mb-1" style={{ color: "#1BA098" }}>
+                    {filteredMessages.length}
+                  </div>
+                  <div className="text-xs" style={{ color: "#DEB992", opacity: 0.7 }}>
+                    Messages {filter !== "all" ? `(${filter})` : ""}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Chat Area - Fixed Height */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Chat Header - Fixed */}
+          <div className="flex-shrink-0 bg-[#051622]/95 backdrop-blur-sm border-b border-[#1BA098]/20 px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setShowSidebar(!showSidebar)}
+                className="lg:hidden p-2 rounded-lg bg-[#1BA098]/20 text-[#1BA098] hover:bg-[#1BA098]/30 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-xl font-bold" style={{ color: "#DEB992" }}>
+                  University Chat Room
+                </h1>
+                <p className="text-sm" style={{ color: "#DEB992", opacity: 0.7 }}>
+                  {filter === "all" ? "All messages" : `Showing ${filter} messages`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <div className="hidden sm:flex items-center space-x-2 px-3 py-2 bg-[#1BA098]/10 rounded-lg">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-sm" style={{ color: "#DEB992" }}>
+                  Live
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Error Message - Fixed */}
+          {error && (
+            <div className="flex-shrink-0 mx-6 mt-4 p-3 bg-red-900/20 backdrop-blur-sm border border-red-500/30 rounded-xl animate-slide-in">
+              <div className="flex items-center">
+                <svg className="w-4 h-4 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span className="text-red-200 text-sm">{error}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Messages Area - Scrollable with Fixed Height */}
+          <div className="flex-1 overflow-hidden">
+            <div ref={messagesContainerRef} className="h-full overflow-y-auto px-6 py-4 space-y-4 relative">
+              {filteredMessages.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center animate-fade-in">
+                    <div className="w-16 h-16 bg-[#1BA098]/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1BA098]/30">
+                      <svg className="w-8 h-8 text-[#1BA098]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2" style={{ color: "#DEB992" }}>
+                      No messages yet
+                    </h3>
+                    <p className="text-sm" style={{ color: "#DEB992", opacity: 0.7 }}>
+                      {filter === "all" ? "Be the first to start the conversation!" : `No messages found for ${filter}`}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                filteredMessages.map((message, index) => {
+                  const isOwnMessage = message.sender._id === user?._id
+                  const showAvatar = index === 0 || filteredMessages[index - 1]?.sender._id !== message.sender._id
+
+                  return (
+                    <div
+                      key={message._id}
+                      className={`flex ${isOwnMessage ? "justify-end" : "justify-start"} animate-slide-in`}
+                      style={{ animationDelay: `${index * 0.02}s` }}
+                    >
                       <div
-                        className={`rounded-2xl px-4 py-3 shadow-lg ${
-                          isOwnMessage
-                            ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-br-md"
-                            : "bg-white border border-gray-200 text-gray-800 rounded-bl-md"
+                        className={`flex items-end space-x-3 max-w-md ${
+                          isOwnMessage ? "flex-row-reverse space-x-reverse" : ""
                         }`}
                       >
-                        {/* Sender Name */}
-                        {!isOwnMessage && (
-                          <div className="text-xs font-semibold text-emerald-600 mb-1">{message.sender.name}</div>
+                        {/* Avatar */}
+                        {showAvatar && (
+                          <div className="w-8 h-8 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                            <span className="text-white text-xs font-bold">{getInitials(message.sender.name)}</span>
+                          </div>
                         )}
+                        {!showAvatar && <div className="w-8"></div>}
 
-                        {/* Message Text */}
-                        <div className="break-words">{message.text}</div>
-
-                        {/* Timestamp */}
-                        <div className={`text-xs mt-2 ${isOwnMessage ? "text-emerald-100" : "text-gray-500"}`}>
-                          {new Date(message.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                        {/* Message Bubble */}
+                        <div
+                          className={`rounded-2xl px-4 py-3 shadow-sm backdrop-blur-sm border transition-all duration-200 hover:scale-[1.02] ${
+                            isOwnMessage
+                              ? "bg-gradient-to-r from-[#1BA098] to-[#159084] text-white rounded-br-md border-[#1BA098]/30"
+                              : "bg-[#051622]/60 border-[#1BA098]/20 text-[#DEB992] rounded-bl-md"
+                          }`}
+                        >
+                          {/* Sender Name */}
+                          {!isOwnMessage && showAvatar && (
+                            <div className="text-xs font-semibold text-[#1BA098] mb-1">{message.sender.name}</div>
+                          )}
+                          {/* Message Text */}
+                          <div className="break-words leading-relaxed text-sm">{message.text}</div>
+                          {/* Timestamp */}
+                          <div className={`text-xs mt-2 ${isOwnMessage ? "text-white/60" : "text-[#DEB992]/50"}`}>
+                            {new Date(message.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })
-            )}
+                  )
+                })
+              )}
 
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex justify-start animate-fadeIn">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="text-gray-600 text-xs font-bold">...</span>
-                  </div>
-                  <div className="bg-gray-200 rounded-2xl px-4 py-3">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-100"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-200"></div>
+              {/* Typing Indicator */}
+              {isTyping && (
+                <div className="flex justify-start animate-fade-in">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-[#1BA098]/30 backdrop-blur-sm rounded-full flex items-center justify-center border border-[#1BA098]/20">
+                      <span className="text-[#1BA098] text-xs font-bold">...</span>
+                    </div>
+                    <div className="bg-[#051622]/60 backdrop-blur-sm border border-[#1BA098]/20 rounded-2xl px-4 py-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-[#1BA098] rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-[#1BA098] rounded-full animate-bounce animation-delay-100"></div>
+                        <div className="w-2 h-2 bg-[#1BA098] rounded-full animate-bounce animation-delay-200"></div>
+                      </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+
+              {/* Scroll to bottom button */}
+              {showScrollToBottom && (
+                <button
+                  onClick={handleScrollToBottom}
+                  className="absolute bottom-4 right-4 z-20 bg-gradient-to-r from-[#1BA098] to-[#159084] hover:from-[#159084] hover:to-[#1BA098] text-white rounded-full shadow-xl p-3 transition-all duration-300 flex items-center justify-center border-2 border-[#051622]/60 backdrop-blur-sm transform hover:scale-110"
+                  title="Scroll to latest message"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Message Input - Fixed at Bottom */}
+          <div className="flex-shrink-0 border-t border-[#1BA098]/20 bg-[#051622]/95 backdrop-blur-sm p-4">
+            {isInputDisabled() && (
+              <div className="mb-3 p-2 bg-amber-900/20 backdrop-blur-sm border border-amber-500/30 rounded-lg">
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 text-amber-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="text-amber-200 text-xs">{getDisabledMessage()}</span>
                 </div>
               </div>
             )}
 
-            <div ref={messagesEndRef} />
-            {/* Improved Scroll to bottom arrow */}
-            {showScrollToBottom && (
+            <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
+              {/* Emoji button */}
               <button
-                onClick={handleScrollToBottom}
-                className="absolute bottom-6 right-6 z-30 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-2xl p-4 transition-all duration-200 flex items-center justify-center border-4 border-white"
-                style={{ boxShadow: '0 4px 24px 0 rgba(16, 185, 129, 0.25)' }}
-                title="Scroll to latest message"
+                type="button"
+                onClick={() => setShowEmojiPicker((v) => !v)}
+                disabled={isInputDisabled()}
+                className={`p-3 rounded-xl bg-[#051622]/60 backdrop-blur-sm border border-[#1BA098]/30 focus:outline-none focus:ring-2 focus:ring-[#1BA098] transition-all duration-200 hover:bg-[#1BA098]/10 ${isInputDisabled() ? "opacity-50 cursor-not-allowed" : "hover:scale-105"}`}
+                aria-label="Add emoji"
               >
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-5 h-5 text-[#1BA098]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M9 9h.01M15 9h.01" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-            )}
-          </div>
 
-          {/* Message Input */}
-          <div className="border-t border-gray-200 bg-white p-6">
-            <form onSubmit={handleSendMessage} className="flex items-center space-x-4">
-              <div className="flex-1 flex items-center relative">
-                {/* Emoji button on the left */}
-                <button
-                  type="button"
-                  onClick={() => setShowEmojiPicker((v) => !v)}
-                  className="mr-2 text-2xl p-2 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 border border-gray-200"
-                  aria-label="Add emoji"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                    <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M9 9h.01M15 9h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                {showEmojiPicker && (
-                  <div className="absolute bottom-12 left-0 z-50">
-                    <Picker
-                      data={data}
-                      onEmojiSelect={(emoji: any) => {
-                        setNewMessage(newMessage + emoji.native);
-                        setShowEmojiPicker(false);
-                      }}
-                      theme="light"
-                    />
-                  </div>
-                )}
+              {showEmojiPicker && !isInputDisabled() && (
+                <div className="absolute bottom-20 left-4 z-50">
+                  <Picker
+                    data={data}
+                    onEmojiSelect={(emoji: any) => {
+                      setNewMessage(newMessage + emoji.native)
+                      setShowEmojiPicker(false)
+                    }}
+                    theme="dark"
+                  />
+                </div>
+              )}
+
+              {/* Message input */}
+              <div className="flex-1 relative">
                 <input
                   ref={inputRef}
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 pr-12"
+                  placeholder={
+                    isInputDisabled() ? "Switch to 'Today' or 'All' to send messages..." : "Type a message..."
+                  }
+                  disabled={isInputDisabled()}
+                  className={`w-full px-4 py-3 bg-[#051622]/60 backdrop-blur-sm border border-[#1BA098]/30 rounded-xl text-[#DEB992] placeholder-[#DEB992]/50 focus:outline-none focus:ring-[#1BA098] focus:border-transparent transition-all duration-200 ${isInputDisabled() ? "opacity-50 cursor-not-allowed" : "hover:border-[#1BA098]/50"}`}
                 />
               </div>
 
+              {/* Send button */}
               <button
                 type="submit"
-                className="group relative px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden"
+                disabled={isInputDisabled() || !newMessage.trim()}
+                className={`px-6 py-3 bg-gradient-to-r from-[#1BA098] to-[#159084] text-[#051622] rounded-xl font-semibold shadow-lg hover:shadow-xl transform transition-all duration-200 focus:outline-none focus:ring-[#1BA098]/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${!isInputDisabled() && newMessage.trim() ? "hover:scale-105" : ""}`}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative flex items-center justify-center space-x-2">
-                  <svg
-                    className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                    />
-                  </svg>
-                  <span>Send</span>
-                </div>
-                <div className="absolute inset-0 -z-10 bg-gradient-to-r from-emerald-400 to-teal-500 blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
+                </svg>
               </button>
             </form>
           </div>
         </div>
+      </div>
 
-        {/* Chat Guidelines */}
-        <div className="mt-12 bg-white rounded-2xl shadow-lg border border-gray-200 p-8 animate-slideInUp animation-delay-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Chat Guidelines</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 rounded-xl mb-4">
-                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Be Respectful</h3>
-              <p className="text-gray-600 text-sm">
-                Treat all students with respect and maintain professional communication standards.
-              </p>
-            </div>
+      {/* Sidebar Overlay for Mobile */}
+      {showSidebar && (
+        <div className="lg:hidden fixed inset-0 bg-black/50 z-20" onClick={() => setShowSidebar(false)} />
+      )}
 
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-teal-100 rounded-xl mb-4">
-                <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Academic Focus</h3>
-              <p className="text-gray-600 text-sm">
-                Keep conversations academic and educational to help everyone learn and grow together.
-              </p>
-            </div>
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      
+        @keyframes slide-in {
+          from { opacity: 0; transform: translateX(-10px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+      
+        @keyframes pulse-subtle {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.05); opacity: 0.8; }
+        }
+      
+        .animate-fade-in { animation: fade-in 0.5s ease-out; }
+        .animate-slide-in { animation: slide-in 0.3s ease-out; }
+        .animate-pulse-subtle { animation: pulse-subtle 3s ease-in-out infinite; }
+      
+        .animation-delay-100 {
+          animation-delay: 0.1s;
+          animation-fill-mode: both;
+        }
+      
+        .animation-delay-200 {
+          animation-delay: 0.2s;
+          animation-fill-mode: both;
+        }
 
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mb-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Stay Safe</h3>
-              <p className="text-gray-600 text-sm">
-                Never share personal information and report any inappropriate behavior immediately.
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center text-gray-500 text-sm">
-            <p>&copy; 2024 Fast Connect. Exclusively for Fast University Students. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+        /* Custom scrollbar for chat messages */
+        .overflow-y-auto::-webkit-scrollbar {
+          width: 6px;
+        }
+      
+        .overflow-y-auto::-webkit-scrollbar-track {
+          background: rgba(27, 160, 152, 0.1);
+          border-radius: 3px;
+        }
+      
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+          background: rgba(27, 160, 152, 0.3);
+          border-radius: 3px;
+        }
+      
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+          background: rgba(27, 160, 152, 0.5);
+        }
+      `}</style>
     </div>
   )
 }
