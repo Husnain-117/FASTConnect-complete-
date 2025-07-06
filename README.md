@@ -1,6 +1,108 @@
-# FastConnect - Student Networking Platform
+# FASTConnect
 
-FastConnect is a comprehensive networking platform designed exclusively for students of FAST University. It provides a seamless way for students to connect, collaborate, and network with their peers through multiple communication channels.
+A modern, full-featured networking and communication platform for FAST University students.
+
+## 🚀 Overview
+FASTConnect enables students to connect, chat, collaborate, and network through real-time text, voice, and video channels. Designed for the FAST community, it offers a secure and interactive experience with advanced search, profile management, and more.
+
+## ✨ Main Features
+
+### 🔐 Authentication & Security
+- Secure JWT-based authentication
+- Registration and login with **email verification**
+- Only emails ending with **@nu.edu.pk** or **@isb.nu.edu.pk** are accepted for registration and login
+- Password recovery, secure password hashing
+- Persistent sessions (Remember Me)
+
+### 👤 Profile Management
+- Create and edit student profiles with academic and personal info
+- Profile photo upload and cropping
+- Campus and batch selection
+- Real-time profile updates
+
+### 🔍 Advanced Search
+- Search for students by name, campus, batch, and more
+- Real-time filtering and suggestions
+- Favorites system and online status indicators
+
+### 💬 Real-time Communication
+- **Text Chat:** Global university chat, real-time messaging, emoji support, typing indicators, message filtering, and more
+- **Voice Chat:** Random voice matching, peer-to-peer audio, skip functionality, online user tracking
+- **Video Chat:** HD video, random matching, dual streams, cross-platform support
+
+### 🎨 Modern UI/UX
+- Responsive, mobile-first design
+- Beautiful gradients and smooth animations
+- Accessibility features and dark/light mode
+
+### 🔧 Technical Highlights
+- Real-time notifications and online/offline status
+- File uploads, image cropping, error handling
+- Performance optimization with lazy loading
+
+## 🛠️ Tech Stack
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, react-router-dom, Socket.IO Client, Axios, React Easy Crop, Emoji Mart, Lucide React
+- **Backend:** Node.js, Express.js, MongoDB, Mongoose, JWT, Socket.IO, Multer, Bcrypt, WebRTC
+
+## ⚡ Quick Start
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Husnain-117/FASTConnect.git
+cd FASTConnect
+```
+
+### 2. Install Dependencies
+#### Backend
+```bash
+cd server
+npm install
+```
+#### Frontend
+```bash
+cd ../client/fastconnect-client
+npm install
+```
+
+### 3. Environment Variables
+#### Backend
+Create a `.env` file in the `server/` directory:
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/fastconnect
+JWT_SECRET=your_jwt_secret_key
+NODE_ENV=development
+```
+#### Frontend
+Create a `.env` file in `client/fastconnect-client/`:
+```env
+VITE_API_URL=https://localhost:5000/api
+```
+
+### 4. Running the App
+#### Backend
+```bash
+cd server
+npm run dev
+```
+#### Frontend
+```bash
+cd client/fastconnect-client
+npm run dev
+```
+
+## 📝 Contribution Guide
+- Fork the repository
+- Create a feature branch
+- Commit and push your changes
+- Open a Pull Request
+
+## 📧 Contact
+For any inquiries, please contact [husnainakram336@gmail.com](mailto:husnainakram336@gmail.com)
+
+---
+
+**Happy Coding!** 🚀
 
 ## Features
 
