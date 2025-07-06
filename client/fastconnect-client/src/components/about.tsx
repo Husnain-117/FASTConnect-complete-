@@ -60,10 +60,10 @@ const About = () => {
       <Navbar />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+      <main className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-12 md:py-16 relative z-10">
         {/* Hero Section */}
-        <div className="text-center mb-20 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-3xl mb-8 shadow-2xl shadow-[#1BA098]/25 animate-float">
+        <div className="text-center mb-12 sm:mb-16 md:mb-20 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-3xl mb-6 sm:mb-8 shadow-2xl shadow-[#1BA098]/25 animate-float">
             <svg
               className="w-12 h-12 text-white animate-pulse-subtle"
               fill="none"
@@ -78,11 +78,11 @@ const About = () => {
               />
             </svg>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-slide-up" style={{ color: "#DEB992" }}>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 animate-slide-up" style={{ color: "#DEB992" }}>
             About <span className="text-[#1BA098] animate-slide-up-delay">FASTConnect</span>
           </h1>
           <p
-            className="text-xl max-w-3xl mx-auto leading-relaxed animate-slide-up-delay-2"
+            className="text-base sm:text-lg md:text-xl max-w-3xl mx-auto leading-relaxed animate-slide-up-delay-2"
             style={{ color: "#DEB992", opacity: 0.9 }}
           >
             Empowering Fast University students to build meaningful connections, collaborate on academic projects, and
@@ -92,7 +92,7 @@ const About = () => {
 
         {/* Mission Section */}
         <div className="mb-20 animate-fade-in-delay-1">
-          <div className="bg-[#051622]/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-[#1BA098]/20 p-12 hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500">
+          <div className="bg-[#051622]/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-[#1BA098]/20 p-4 sm:p-8 md:p-12 hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500">
             <div className="text-center mb-12 animate-slide-down">
               <h2 className="text-3xl font-bold mb-4" style={{ color: "#DEB992" }}>
                 Our Mission
@@ -168,7 +168,7 @@ const About = () => {
         </div>
 
         {/* Features Section */}
-        <div className="mb-20 animate-fade-in-delay-2">
+        <div className="mb-12 sm:mb-16 md:mb-20 animate-fade-in-delay-2">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 animate-slide-up" style={{ color: "#DEB992" }}>
               Platform Features
@@ -177,7 +177,7 @@ const About = () => {
               Discover the powerful tools designed to enhance your university experience and academic collaboration.
             </p>
           </div>
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12 items-center">
             {/* Feature List */}
             <div className="space-y-8 animate-slide-in-left">
               <div className="flex items-start space-x-4 group hover:scale-105 transition-all duration-300 p-4 rounded-xl hover:bg-[#1BA098]/10 animate-slide-in-left-stagger-1">
@@ -253,8 +253,8 @@ const About = () => {
               </div>
             </div>
             {/* Feature Visual */}
-            <div className="bg-gradient-to-br from-[#1BA098]/20 to-[#159084]/20 backdrop-blur-sm rounded-3xl p-12 text-center border border-[#1BA098]/20 hover:border-[#1BA098]/40 transition-all duration-500 hover:scale-105 animate-slide-in-right">
-              <div className="inline-flex items-center justify-center w-32 h-32 bg-[#051622]/80 backdrop-blur-sm rounded-full shadow-2xl shadow-[#1BA098]/25 mb-8 animate-float">
+            <div className="bg-gradient-to-br from-[#1BA098]/20 to-[#159084]/20 backdrop-blur-sm rounded-3xl p-6 sm:p-8 md:p-12 text-center border border-[#1BA098]/20 hover:border-[#1BA098]/40 transition-all duration-500 hover:scale-105 animate-slide-in-right">
+              <div className="inline-flex items-center justify-center w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-[#051622]/80 backdrop-blur-sm rounded-full shadow-2xl shadow-[#1BA098]/25 mb-6 sm:mb-8 animate-float">
                 <svg
                   className="w-16 h-16 text-[#1BA098] animate-pulse-subtle"
                   fill="none"
@@ -269,10 +269,10 @@ const About = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-4" style={{ color: "#DEB992" }}>
+              <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4" style={{ color: "#DEB992" }}>
                 Nationwide Network
               </h3>
-              <p className="text-lg" style={{ color: "#DEB992", opacity: 0.8 }}>
+              <p className="text-base sm:text-lg" style={{ color: "#DEB992", opacity: 0.8 }}>
                 Connect with over 50,000+ Fast University students across 7 major campuses in Pakistan.
               </p>
             </div>
@@ -280,13 +280,13 @@ const About = () => {
         </div>
 
         {/* Statistics Section */}
-        <div className="mb-20 animate-fade-in-delay-3">
-          <div className="bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-3xl p-12 text-white shadow-2xl shadow-[#1BA098]/25 hover:shadow-[#1BA098]/35 transition-all duration-500 hover:scale-105">
+        <div className="mb-12 sm:mb-16 md:mb-20 animate-fade-in-delay-3">
+          <div className="bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-3xl p-6 sm:p-8 md:p-12 text-white shadow-2xl shadow-[#1BA098]/25 hover:shadow-[#1BA098]/35 transition-all duration-500 hover:scale-105">
             <div className="text-center mb-12 animate-slide-down">
               <h2 className="text-3xl font-bold mb-4">Platform Impact</h2>
               <p className="text-[#DEB992]/80 text-lg">Making a difference in the Fast University community</p>
             </div>
-            <div className="grid md:grid-cols-4 gap-8 text-center">
+            <div className="grid gap-6 sm:gap-8 md:grid-cols-4 text-center">
               <div className="animate-slide-up-stagger-1 hover:scale-110 transition-all duration-300">
                 <div className="text-4xl font-bold mb-2 animate-counter">50,000+</div>
                 <div className="text-[#DEB992]/80">Active Students</div>
@@ -461,7 +461,7 @@ const About = () => {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href={userId && userId !== "undefined" ? "/profile" : "/login"}
+                   
                     className="hover:text-[#1BA098] transition-colors duration-300"
                     style={{ color: "#DEB992", opacity: 0.8 }}
                   >
@@ -479,7 +479,7 @@ const About = () => {
                 </li>
                 <li>
                   <a
-                    href="/voicechat"
+                    href="/voice-chat"
                     className="hover:text-[#1BA098] transition-colors duration-300"
                     style={{ color: "#DEB992", opacity: 0.8 }}
                   >
@@ -488,7 +488,7 @@ const About = () => {
                 </li>
                 <li>
                   <a
-                    href="/guidelines"
+                    href=""
                     className="hover:text-[#1BA098] transition-colors duration-300"
                     style={{ color: "#DEB992", opacity: 0.8 }}
                   >
@@ -504,7 +504,7 @@ const About = () => {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="/support"
+                    href=""
                     className="hover:text-[#1BA098] transition-colors duration-300"
                     style={{ color: "#DEB992", opacity: 0.8 }}
                   >
@@ -513,7 +513,7 @@ const About = () => {
                 </li>
                 <li>
                   <a
-                    href="/contact"
+                    href=""
                     className="hover:text-[#1BA098] transition-colors duration-300"
                     style={{ color: "#DEB992", opacity: 0.8 }}
                   >
@@ -522,7 +522,7 @@ const About = () => {
                 </li>
                 <li>
                   <a
-                    href="/privacy"
+                    href=""
                     className="hover:text-[#1BA098] transition-colors duration-300"
                     style={{ color: "#DEB992", opacity: 0.8 }}
                   >
@@ -531,7 +531,7 @@ const About = () => {
                 </li>
                 <li>
                   <a
-                    href="/terms"
+                    href=""
                     className="hover:text-[#1BA098] transition-colors duration-300"
                     style={{ color: "#DEB992", opacity: 0.8 }}
                   >

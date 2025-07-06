@@ -135,10 +135,10 @@ const ForgotPassword = () => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-xs sm:max-w-sm md:max-w-md px-2 sm:px-0 flex flex-col items-center animate-fade-in">
+      <div className="relative z-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-2 sm:px-4 md:px-6 flex flex-col items-center animate-fade-in">
         {/* Header Section */}
-        <div className="text-center mb-8 animate-slide-down">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-[#1BA098] rounded-full mb-4 shadow-lg animate-pulse-subtle">
+        <div className="text-center mb-6 sm:mb-8 animate-slide-down">
+          <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#1BA098] rounded-full mb-3 sm:mb-4 shadow-lg animate-pulse-subtle">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -148,17 +148,17 @@ const ForgotPassword = () => {
               />
             </svg>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: "#DEB992" }}>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2" style={{ color: "#DEB992" }}>
             Reset Password
           </h1>
-          <p className="text-xs" style={{ color: "#DEB992" }}>
+          <p className="text-xs sm:text-sm" style={{ color: "#DEB992" }}>
             {otpSent ? "Enter OTP and set your new password" : "Enter your email to receive an OTP"}
           </p>
         </div>
 
         {/* Success Message */}
         {success && (
-          <div className="mb-6 p-4 bg-emerald-900/20 rounded-xl w-full animate-slide-in">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-emerald-900/20 rounded-xl w-full animate-slide-in">
             <div className="flex items-center">
               <svg className="w-5 h-5 text-emerald-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -174,7 +174,7 @@ const ForgotPassword = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-900/20 rounded-xl w-full animate-slide-in">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-900/20 rounded-xl w-full animate-slide-in">
             <div className="flex items-center">
               <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -192,7 +192,7 @@ const ForgotPassword = () => {
         <div className="w-full animate-slide-up">
           {otpSent ? (
             /* Reset Password Form */
-            <form onSubmit={handleResetPassword} className="space-y-6 w-full">
+            <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-6 w-full">
               <div className="space-y-4">
                 {/* OTP Field */}
                 <div className="animate-fade-in-delay-1">
@@ -209,7 +209,7 @@ const ForgotPassword = () => {
                       placeholder="Enter 6-digit OTP"
                       value={otp}
                       onChange={(e) => setOTP(e.target.value)}
-                      className="w-full px-2 py-2 sm:px-3 sm:py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-xs sm:text-sm transition-all duration-300 hover:scale-[1.02] focus:scale-[1.02] pr-10"
+                      className="w-full px-2 py-2 sm:px-3 sm:py-2 md:px-4 md:py-3 lg:px-5 lg:py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-xs sm:text-sm md:text-base lg:text-lg transition-all duration-300 hover:scale-[1.02] focus:scale-[1.02] pr-8 sm:pr-10 md:pr-12 lg:pr-14"
                       disabled={isResettingPassword}
                       maxLength={6}
                     />
@@ -253,7 +253,7 @@ const ForgotPassword = () => {
                       placeholder="Enter your new password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-2 py-2 sm:px-3 sm:py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-base sm:text-lg transition-all duration-300 hover:scale-[1.02] focus:scale-[1.02] pr-10"
+                      className="w-full px-2 py-2 sm:px-3 sm:py-2 md:px-4 md:py-3 lg:px-5 lg:py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm sm:text-base md:text-lg lg:text-xl transition-all duration-300 hover:scale-[1.02] focus:scale-[1.02] pr-8 sm:pr-10 md:pr-12 lg:pr-14"
                       disabled={isResettingPassword}
                     />
                     <button

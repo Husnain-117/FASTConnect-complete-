@@ -52,6 +52,17 @@ exports.sendMessage = async (req, res) => {
   }
 };
 
+// Delete all messages
+exports.deleteAllMessages = async (req, res) => {
+  try {
+    await Message.deleteMany({});
+    res.json({ success: true, message: 'All chats deleted.' });
+  } catch (err) {
+    console.error('Error deleting all messages:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete all chats', error: err.message });
+  }
+};
+
 // Get all messages
 exports.getMessages = async (req, res) => {
   try {

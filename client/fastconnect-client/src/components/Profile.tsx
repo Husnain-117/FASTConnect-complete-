@@ -288,10 +288,10 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
       <Navbar />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+      <main className="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-12 md:py-16 relative z-10">
         {/* Hero Section */}
-        <div className="text-center mb-16 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-2xl mb-8 shadow-2xl shadow-[#1BA098]/25 animate-float">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-2xl mb-6 sm:mb-8 shadow-2xl shadow-[#1BA098]/25 animate-float">
             <svg
               className="w-10 h-10 text-white animate-pulse-subtle"
               fill="none"
@@ -306,11 +306,11 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
               />
             </svg>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-slide-up" style={{ color: "#DEB992" }}>
+          <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 animate-slide-up" style={{ color: "#DEB992" }}>
             My <span className="text-[#1BA098] animate-slide-up-delay">Profile</span>
           </h1>
           <p
-            className="text-xl max-w-3xl mx-auto leading-relaxed animate-slide-up-delay-2"
+            className="text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl mx-auto leading-relaxed animate-slide-up-delay-2"
             style={{ color: "#DEB992", opacity: 0.9 }}
           >
             Manage your profile information and connect with fellow Fast University students. Keep your details updated
@@ -321,7 +321,7 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
         {/* Show message or profile */}
         {!profileExists && !showForm && (
           <div className="text-center mb-8 animate-fade-in-delay-1">
-            <div className="bg-[#051622]/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-[#1BA098]/20 p-12 mb-8 hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500">
+            <div className="bg-[#051622]/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-[#1BA098]/20 p-6 sm:p-8 md:p-12 mb-6 sm:mb-8 hover:shadow-[#1BA098]/25 hover:shadow-2xl transition-all duration-500">
               <div className="mb-8">
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-[#1BA098] to-[#159084] rounded-full mb-6 shadow-lg animate-bounce-subtle">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,7 +347,7 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
 
         {/* Success message on profile card */}
         {message && !showForm && (
-          <div className="mb-6 p-6 bg-gradient-to-r from-[#1BA098]/20 to-[#159084]/20 backdrop-blur-sm border-2 border-[#1BA098]/30 rounded-2xl text-center transform transition-all duration-500 animate-slide-in shadow-lg hover:shadow-[#1BA098]/25">
+          <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-gradient-to-r from-[#1BA098]/20 to-[#159084]/20 backdrop-blur-sm border-2 border-[#1BA098]/30 rounded-2xl text-center transform transition-all duration-500 animate-slide-in shadow-lg hover:shadow-[#1BA098]/25">
             <div className="flex items-center justify-center mb-2">
               <div className="w-12 h-12 bg-[#1BA098] rounded-full flex items-center justify-center animate-pulse-subtle">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -360,11 +360,11 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
         )}
 
         {profileExists && !showForm && (
-          <div className="bg-[#051622]/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-[#1BA098]/20 overflow-hidden mb-8 transform transition-all duration-500 hover:shadow-[#1BA098]/25 hover:shadow-2xl animate-fade-in-delay-1 hover:scale-105">
+          <div className="bg-[#051622]/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-[#1BA098]/20 overflow-hidden mb-6 sm:mb-8 transform transition-all duration-500 hover:shadow-[#1BA098]/25 hover:shadow-2xl animate-fade-in-delay-1 hover:scale-105">
             <div className="bg-gradient-to-r from-[#1BA098] to-[#159084] px-8 py-12">
               <div className="flex flex-col items-center">
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-full border-4 border-white shadow-2xl shadow-[#1BA098]/25 overflow-hidden bg-white mb-4 transform transition-all duration-300 group-hover:scale-105 animate-float">
+                  <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-2xl shadow-[#1BA098]/25 overflow-hidden bg-white mb-3 sm:mb-4 transform transition-all duration-300 group-hover:scale-105 animate-float">
                     {photoPreview || form.profilePhoto ? (
                       <img
                         src={
@@ -407,7 +407,7 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                   </div>
                 </div>
                 <div className="text-center text-white space-y-2">
-                  <h2 className="text-3xl font-bold mb-2 animate-slide-up">{form.name || "Your Name"}</h2>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2 animate-slide-up">{form.name || "Your Name"}</h2>
                   {form.nickname && (
                     <p className="text-[#DEB992]/80 text-lg mb-1 animate-slide-up-delay-1">"{form.nickname}"</p>
                   )}

@@ -17,6 +17,7 @@ const ICE_SERVERS = {
 type MatchState = "idle" | "searching" | "matched" | "waiting" | "chatting"
 
 const VideoChat = () => {
+  
   const [isRunning, setIsRunning] = useState(false)
   const [connected, setConnected] = useState(false)
   const [otherUser, setOtherUser] = useState<any>(null)
@@ -176,8 +177,12 @@ const VideoChat = () => {
       if (!peerRef.current) return
       await peerRef.current.setRemoteDescription(new window.RTCSessionDescription(offer))
       const answer = await peerRef.current.createAnswer()
-      await peerRef.current.setLocalDescription(answer)
-      socket.emit("answer", { answer, to: from })
+      if (peerRef.current.signalingState === "have-remote-offer") {
+        await peerRef.current.setLocalDescription(answer)
+        socket.emit("answer", { answer, to: from })
+      } else {
+        console.warn("[VideoChat] Tried to set local answer in wrong signaling state:", peerRef.current.signalingState)
+      }
     }
 
     const handleAnswer = async ({ answer }: { answer: any }) => {

@@ -11,4 +11,7 @@ router.post('/send', authenticate, textController.sendMessage);
 
 router.get('/all', textController.getMessages);
 
+// Delete all chats
+router.delete('/all', authenticate, textController.deleteAllMessages);
+
 module.exports = router; 

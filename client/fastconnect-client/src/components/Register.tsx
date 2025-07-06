@@ -43,6 +43,10 @@ const Register = () => {
     e.preventDefault()
     setError("")
     setSuccess("")
+    if (!email.endsWith("@nu.edu.pk") && !email.endsWith("@isb.nu.edu.pk")) {
+      setError("Only @nu.edu.pk or @isb.nu.edu.pk email addresses are allowed.");
+      return;
+    }
     try {
       await sendOTP(email)
       setOTPSent(true)
@@ -57,6 +61,10 @@ const Register = () => {
     e.preventDefault()
     setError("")
     setSuccess("")
+    if (!email.endsWith("@isb.nu.edu.pk")) {
+      setError("Only @isb.nu.edu.pk email addresses are allowed.");
+      return;
+    }
     setIsRegistering(true)
     try {
       await verifyAndRegister(email, otp, password, name, campus, batch)
