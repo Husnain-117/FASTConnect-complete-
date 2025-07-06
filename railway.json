@@ -1,0 +1,9 @@
+{
+    "build": {
+      "builder": "NIXPACKS",
+      "buildCommand": "npm install",
+      "startCommand": "nodemon https-server.js",
+      "rootDirectory": "server"
+    }
+  }
+  
