@@ -227,7 +227,7 @@ cd FastConnect
 #### Backend Setup
 ```bash
 cd server
-npm install
+nodemon https-server.js
 ```
 
 #### Frontend Setup
